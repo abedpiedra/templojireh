@@ -1,18 +1,36 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLive, setIsLive] = useState(false);
   const pathname = usePathname();
+
+  useEffect(() => {
+    const checkLiveStatus = async () => {
+      try {
+        const res = await fetch('/api/youtube/live');
+        const data = await res.json();
+        setIsLive(data.isLive);
+      } catch (error) {
+        console.error('Error checking live status:', error);
+      }
+    };
+
+    checkLiveStatus();
+    const interval = setInterval(checkLiveStatus, 60000); // Check every minute
+    return () => clearInterval(interval);
+  }, []);
 
   const navLinks = [
     { href: "/", label: "Inicio" },
     { href: "/nosotros", label: "Nosotros" },
     { href: "/sermones", label: "Sermones" },
     { href: "/eventos", label: "Eventos" },
+    { href: "/en-vivo", label: "En Vivo", isLive: true },
     { href: "/contacto", label: "Contacto" },
   ];
 
@@ -81,7 +99,7 @@ export default function Header() {
             className={`${isMenuOpen ? "block" : "hidden"} md:block absolute md:relative top-full left-0 right-0 bg-white md:bg-transparent shadow-md md:shadow-none`}
           >
             <ul className="flex flex-col md:flex-row md:gap-8 p-4 md:p-0">
-              {navLinks.map((link) => (
+              {navLinks.map((link: any) => (
                 <li
                   key={link.href}
                   className="border-b md:border-none border-gray-100"
@@ -90,9 +108,15 @@ export default function Header() {
                     href={link.href}
                     className={`block py-3 md:py-0 font-medium transition-colors hover:text-primary ${
                       pathname === link.href ? "text-primary" : "text-dark"
-                    }`}
+                    } ${link.isLive && isLive ? "flex items-center gap-2" : ""}`}
                     onClick={() => setIsMenuOpen(false)}
                   >
+                    {link.isLive && isLive && (
+                      <span className="flex items-center gap-1 bg-red-600 text-white text-xs px-2 py-0.5 rounded-full">
+                        <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
+                        EN VIVO
+                      </span>
+                    )}
                     {link.label}
                   </Link>
                 </li>
