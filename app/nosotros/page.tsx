@@ -1,7 +1,7 @@
-import Image from 'next/image'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
-import PageHeader from '@/components/PageHeader'
+import Image from "next/image";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import PageHeader from "@/components/PageHeader";
 
 export default function NosotrosPage() {
   return (
@@ -17,18 +17,22 @@ export default function NosotrosPage() {
               <p className="section-subtitle">Nuestra Historia</p>
               <h2 className="section-title">Una Iglesia con Propósito</h2>
               <p className="text-gray-600 mb-4">
-                Templo Jireh nació con la visión de ser un lugar donde cada persona pueda encontrar
-                a Dios y experimentar su amor transformador. Desde nuestros inicios, hemos sido una
-                comunidad comprometida con la predicación de la Palabra y el servicio a nuestra comunidad.
+                Templo Jireh nació con la visión de ser un lugar donde cada
+                persona pueda encontrar a Dios y experimentar su amor
+                transformador. Desde nuestros inicios, hemos sido una comunidad
+                comprometida con la predicación de la Palabra y el servicio a
+                nuestra comunidad.
               </p>
               <p className="text-gray-600 mb-4">
-                A lo largo de los años, hemos crecido no solo en número, sino también en profundidad
-                espiritual. Creemos que cada persona tiene un propósito divino y trabajamos para ayudar
-                a cada miembro a descubrir y desarrollar sus dones y talentos.
+                A lo largo de los años, hemos crecido no solo en número, sino
+                también en profundidad espiritual. Creemos que cada persona
+                tiene un propósito divino y trabajamos para ayudar a cada
+                miembro a descubrir y desarrollar sus dones y talentos.
               </p>
               <p className="text-gray-600">
-                Bajo el liderazgo del Pastor Luis Luengo, continuamos creciendo y alcanzando a más
-                personas con el mensaje de esperanza y salvación que solo Cristo puede ofrecer.
+                Bajo el liderazgo del Pastor Luis Luengo, continuamos creciendo
+                y alcanzando a más personas con el mensaje de esperanza y
+                salvación que solo Cristo puede ofrecer.
               </p>
             </div>
             <div className="relative h-[400px] rounded-xl overflow-hidden shadow-2xl">
@@ -54,14 +58,21 @@ export default function NosotrosPage() {
               <p className="section-subtitle">Nuestra Misión</p>
               <h2 className="section-title">Transformando Vidas</h2>
               <p className="text-gray-600 mb-4">
-                Nuestra misión es clara: llevar el mensaje de salvación a toda persona, discipular
-                a los creyentes y equiparlos para servir. Creemos en el poder de la comunidad
-                cristiana para impactar positivamente en la sociedad.
+                Nuestra misión es clara: llevar el mensaje de salvación a toda
+                persona, discipular a los creyentes y equiparlos para servir.
+                Creemos en el poder de la comunidad cristiana para impactar
+                positivamente en la sociedad.
               </p>
               <ul className="space-y-3">
-                {['Predicar el Evangelio con fidelidad', 'Formar discípulos comprometidos', 'Servir a nuestra comunidad', 'Fortalecer las familias'].map((item, i) => (
+                {[
+                  "Predicar el Evangelio con fidelidad",
+                  "Formar discípulos comprometidos",
+                  "Servir a nuestra comunidad",
+                  "Fortalecer las familias",
+                ].map((item, i) => (
                   <li key={i} className="flex items-center text-gray-600">
-                    <i className="fas fa-check-circle text-secondary mr-3"></i> {item}
+                    <i className="fas fa-check-circle text-secondary mr-3"></i>{" "}
+                    {item}
                   </li>
                 ))}
               </ul>
@@ -79,14 +90,37 @@ export default function NosotrosPage() {
           </div>
           <div className="grid md:grid-cols-4 gap-8">
             {[
-              { icon: 'fa-bible', title: 'Palabra de Dios', desc: 'La Biblia es nuestra autoridad máxima en fe y conducta.' },
-              { icon: 'fa-praying-hands', title: 'Oración', desc: 'Buscamos la dirección de Dios en todo lo que hacemos.' },
-              { icon: 'fa-heart', title: 'Amor', desc: 'El amor de Cristo nos motiva a amar sin condiciones.' },
-              { icon: 'fa-hands-helping', title: 'Servicio', desc: 'Servimos siguiendo el ejemplo de Jesús.' },
+              {
+                icon: "fa-bible",
+                title: "Palabra de Dios",
+                desc: "La Biblia es nuestra autoridad máxima en fe y conducta.",
+              },
+              {
+                icon: "fa-praying-hands",
+                title: "Oración",
+                desc: "Buscamos la dirección de Dios en todo lo que hacemos.",
+              },
+              {
+                icon: "fa-heart",
+                title: "Amor",
+                desc: "El amor de Cristo nos motiva a amar sin condiciones.",
+              },
+              {
+                icon: "fa-hands-helping",
+                title: "Servicio",
+                desc: "Servimos siguiendo el ejemplo de Jesús.",
+              },
             ].map((item, i) => (
-              <div key={i} className="bg-white rounded-xl shadow-lg p-8 text-center">
-                <i className={`fas ${item.icon} text-4xl text-primary mb-4`}></i>
-                <h3 className="text-xl font-semibold text-dark mb-3">{item.title}</h3>
+              <div
+                key={i}
+                className="bg-white rounded-xl shadow-lg p-8 text-center"
+              >
+                <i
+                  className={`fas ${item.icon} text-4xl text-primary mb-4`}
+                ></i>
+                <h3 className="text-xl font-semibold text-dark mb-3">
+                  {item.title}
+                </h3>
                 <p className="text-gray-600 text-sm">{item.desc}</p>
               </div>
             ))}
@@ -103,16 +137,39 @@ export default function NosotrosPage() {
           </div>
           <div className="grid md:grid-cols-4 gap-8">
             {[
-              { name: 'Pastor Luis Luengo', role: 'Pastor Principal', img: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400' },
-              { name: 'María de Luengo', role: 'Co-Pastora', img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400' },
-              { name: 'Carlos Martínez', role: 'Líder de Jóvenes', img: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400' },
-              { name: 'Ana García', role: 'Líder de Adoración', img: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400' },
+              {
+                name: "Pastor Luis Luengo",
+                role: "Pastor Principal",
+                img: "/prluis.png",
+              },
+              {
+                name: "Magdalena Medina",
+                role: "Pastora",
+                img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400",
+              },
+              {
+                name: "Dominique Cisterna",
+                role: "Líder de Jóvenes",
+                img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400",
+              },
+              {
+                name: "Ana García",
+                role: "Líder de Adoración",
+                img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400",
+              },
             ].map((person, i) => (
               <div key={i} className="text-center">
                 <div className="relative w-48 h-48 mx-auto mb-4 rounded-full overflow-hidden border-4 border-primary">
-                  <Image src={person.img} alt={person.name} fill className="object-cover" />
+                  <Image
+                    src={person.img}
+                    alt={person.name}
+                    fill
+                    className="object-cover"
+                  />
                 </div>
-                <h3 className="text-lg font-semibold text-dark">{person.name}</h3>
+                <h3 className="text-lg font-semibold text-dark">
+                  {person.name}
+                </h3>
                 <p className="text-gray-500 text-sm">{person.role}</p>
               </div>
             ))}
@@ -123,9 +180,17 @@ export default function NosotrosPage() {
       {/* CTA */}
       <section className="py-20 bg-gradient-to-r from-dark to-dark-light text-white text-center">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">¿Quieres Conocernos?</h2>
-          <p className="text-xl text-gray-300 mb-8">Te invitamos a visitarnos este domingo y ser parte de nuestra familia.</p>
-          <a href="/contacto" className="inline-block px-8 py-4 bg-white text-dark font-semibold rounded-md hover:bg-primary hover:text-white transition-colors">
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            ¿Quieres Conocernos?
+          </h2>
+          <p className="text-xl text-gray-300 mb-8">
+            Te invitamos a visitarnos este domingo y ser parte de nuestra
+            familia.
+          </p>
+          <a
+            href="/contacto"
+            className="inline-block px-8 py-4 bg-white text-dark font-semibold rounded-md hover:bg-primary hover:text-white transition-colors"
+          >
             Planifica tu Visita
           </a>
         </div>
@@ -133,5 +198,5 @@ export default function NosotrosPage() {
 
       <Footer />
     </>
-  )
+  );
 }
