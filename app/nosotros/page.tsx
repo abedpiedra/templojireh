@@ -145,17 +145,17 @@ export default function NosotrosPage() {
               {
                 name: "Magdalena Medina",
                 role: "Pastora",
-                img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400",
+                img: "",
               },
               {
                 name: "Dominique Cisterna",
                 role: "Líder de Jóvenes",
-                img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400",
+                img: "/dominique.png",
               },
               {
-                name: "Ana García",
-                role: "Líder de Adoración",
-                img: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400",
+                name: "Evelyn Perez",
+                role: "Superintendente Escuela Dominical",
+                img: "",
               },
             ].map((person, i) => (
               <div key={i} className="text-center">

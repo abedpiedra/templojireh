@@ -36,13 +36,25 @@ export default function Header() {
             </span>
           </div>
           <div className="flex gap-4">
-            <a href="#" className="hover:text-primary transition-colors">
+            <a
+              href="https://www.facebook.com/Jirehchurch0498"
+              target="_blank"
+              className="hover:text-primary transition-colors"
+            >
               <i className="fab fa-facebook-f"></i>
             </a>
-            <a href="#" className="hover:text-primary transition-colors">
+            <a
+              href="https://www.youtube.com/@TemploJirehTV"
+              target="_blank"
+              className="hover:text-primary transition-colors"
+            >
               <i className="fab fa-youtube"></i>
             </a>
-            <a href="#" className="hover:text-primary transition-colors">
+            <a
+              href="https://www.instagram.com/templo_jireh/"
+              target="_blank"
+              className="hover:text-primary transition-colors"
+            >
               <i className="fab fa-instagram"></i>
             </a>
           </div>

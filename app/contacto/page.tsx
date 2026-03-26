@@ -16,15 +16,12 @@ export default function ContactoPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Aquí iría la lógica para enviar el formulario
-    alert("Mensaje enviado correctamente. Nos pondremos en contacto pronto.");
-    setFormData({
-      nombre: "",
-      email: "",
-      telefono: "",
-      asunto: "",
-      mensaje: "",
-    });
+
+    const asuntoTexto = formData.asunto || "Consulta general";
+    const mensaje = `*Mensaje desde la web de Templo Jireh*%0A%0A*Nombre:* ${formData.nombre}%0A*Email:* ${formData.email}%0A*Teléfono:* ${formData.telefono || "No proporcionado"}%0A*Asunto:* ${asuntoTexto}%0A%0A*Mensaje:*%0A${formData.mensaje}`;
+
+    const whatsappUrl = `https://wa.me/56957268552?text=${mensaje}`;
+    window.open(whatsappUrl, "_blank");
   };
 
   return (
@@ -38,11 +35,6 @@ export default function ContactoPage() {
             {/* Contact Info */}
             <div className="space-y-6">
               {[
-                {
-                  icon: "fa-map-marker-alt",
-                  title: "Dirección",
-                  lines: ["Presidente Alessandri #0498", "La Granja, Santiago"],
-                },
                 {
                   icon: "fa-phone",
                   title: "Teléfono",
@@ -78,6 +70,27 @@ export default function ContactoPage() {
                   </div>
                 </div>
               ))}
+              {/* Map */}
+              <div className="bg-white rounded-xl shadow-lg p-4 overflow-hidden">
+                <div className="flex gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                    <i className="fas fa-map-marker-alt text-white"></i>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-dark">Dirección</h4>
+                    <p className="text-gray-600 text-sm">
+                      Presidente Alessandri #0498, La Granja
+                    </p>
+                  </div>
+                </div>
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3326.1980729433344!2d-70.63261024089293!3d-33.52223546442555!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9662da85b6889b65%3A0x227e972b26c2563c!2sTemplo%20Jireh!5e0!3m2!1ses-419!2scl!4v1774500116488!5m2!1ses-419!2scl"
+                  className="w-full h-[200px] rounded-lg border-0"
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  allowFullScreen
+                ></iframe>
+              </div>
             </div>
 
             {/* Contact Form */}
@@ -144,8 +157,7 @@ export default function ContactoPage() {
                       <option value="">Seleccionar...</option>
                       <option value="informacion">Información General</option>
                       <option value="oracion">Petición de Oración</option>
-                      <option value="visita">Planificar una Visita</option>
-                      <option value="voluntario">Quiero ser Voluntario</option>
+                      <option value="visita">Solicitud de Evento</option>
                       <option value="otro">Otro</option>
                     </select>
                   </div>
@@ -164,57 +176,16 @@ export default function ContactoPage() {
                     required
                   ></textarea>
                 </div>
-                <button type="submit" className="w-full btn-primary py-4">
-                  <i className="fas fa-paper-plane mr-2"></i> Enviar Mensaje
+                <button
+                  type="submit"
+                  className="w-full btn-primary py-4 flex items-center justify-center gap-2"
+                >
+                  <i className="fab fa-whatsapp text-xl"></i> Enviar por WhatsApp
                 </button>
               </form>
             </div>
           </div>
         </div>
-      </section>
-
-      {/* Service Times */}
-      <section className="bg-primary">
-        <div className="container mx-auto px-4">
-          <div className="grid md:grid-cols-4">
-            {[
-              {
-                icon: "fa-sun",
-                title: "Servicio Dominical",
-                time: "Domingos 10:00 AM",
-              },
-              {
-                icon: "fa-book-bible",
-                title: "Estudio Bíblico",
-                time: "Miércoles 7:00 PM",
-              },
-              {
-                icon: "fa-praying-hands",
-                title: "Oración",
-                time: "Viernes 7:00 PM",
-              },
-              { icon: "fa-users", title: "Jóvenes", time: "Sábados 6:00 PM" },
-            ].map((item, i) => (
-              <div
-                key={i}
-                className="text-white text-center py-10 px-6 border-r border-white/20 last:border-r-0"
-              >
-                <i className={`fas ${item.icon} text-4xl mb-4`}></i>
-                <h3 className="text-lg font-semibold mb-1">{item.title}</h3>
-                <p className="text-sm opacity-90">{item.time}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Map */}
-      <section className="h-[400px] bg-gray-300">
-        <iframe
-          src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3022.9663095919355!2d-74.00425878428698!3d40.74076904379132!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNDDCsDQ0JzI3LjYiTiA3NMKwMDAnMDcuNyJX!5e0!3m2!1sen!2sus!4v1234567890"
-          className="w-full h-full border-0"
-          loading="lazy"
-        ></iframe>
       </section>
 
       <Footer />
