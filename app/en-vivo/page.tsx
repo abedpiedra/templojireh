@@ -36,7 +36,10 @@ export default function EnVivoPage() {
   const [activeFilter, setActiveFilter] = useState<FilterType>("todos");
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
-  const [availableYears, setAvailableYears] = useState<number[]>([]);
+  // Generate default years (current year down to 2023)
+  const currentYear = new Date().getFullYear();
+  const defaultYears = Array.from({ length: currentYear - 2022 }, (_, i) => currentYear - i);
+  const [availableYears, setAvailableYears] = useState<number[]>(defaultYears);
   const carouselRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -55,10 +58,13 @@ export default function EnVivoPage() {
         setVideos(videoList);
         setFilteredVideos(videoList);
 
-        // Extract available years from videos
-        const yearsSet = new Set(videoList.map((v: Video) => new Date(v.publishedAt).getFullYear()));
-        const years = Array.from(yearsSet) as number[];
-        setAvailableYears(years.sort((a: number, b: number) => b - a));
+        // Extract available years from videos and combine with default years
+        if (videoList.length > 0) {
+          const yearsFromVideos = videoList.map((v: Video) => new Date(v.publishedAt).getFullYear());
+          const allYears = new Set([...yearsFromVideos, ...defaultYears]);
+          const years = Array.from(allYears) as number[];
+          setAvailableYears(years.sort((a: number, b: number) => b - a));
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
       } finally {
