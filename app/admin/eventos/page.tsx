@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import Link from 'next/link'
 
 interface Evento {
@@ -15,7 +15,7 @@ interface Evento {
   imagen?: string
 }
 
-export default function AdminEventosPage() {
+function AdminEventosContent() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -230,5 +230,13 @@ export default function AdminEventosPage() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function AdminEventosPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-100 flex items-center justify-center"><i className="fas fa-spinner fa-spin text-4xl text-primary"></i></div>}>
+      <AdminEventosContent />
+    </Suspense>
   )
 }

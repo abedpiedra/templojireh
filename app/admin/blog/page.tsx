@@ -2,7 +2,7 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import Link from 'next/link'
 
 interface BlogPost {
@@ -17,7 +17,7 @@ interface BlogPost {
   imagen?: string
 }
 
-export default function AdminBlogPage() {
+function AdminBlogContent() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -245,5 +245,13 @@ export default function AdminBlogPage() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function AdminBlogPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-gray-100 flex items-center justify-center"><i className="fas fa-spinner fa-spin text-4xl text-primary"></i></div>}>
+      <AdminBlogContent />
+    </Suspense>
   )
 }
