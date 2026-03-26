@@ -17,17 +17,24 @@ export default function AdminLoginPage() {
     setLoading(true)
     setError('')
 
-    const result = await signIn('credentials', {
-      email,
-      password,
-      redirect: false,
-    })
+    try {
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false,
+      })
 
-    if (result?.error) {
-      setError('Usuario o contraseña incorrectos')
+      if (result?.error) {
+        setError('Usuario o contraseña incorrectos')
+        setLoading(false)
+      } else if (result?.ok) {
+        alert('Login exitoso! Redirigiendo...')
+        window.location.replace('/admin')
+      }
+    } catch (err) {
+      console.error('Login error:', err)
+      setError('Error de conexión. Intenta de nuevo.')
       setLoading(false)
-    } else {
-      router.push('/admin')
     }
   }
 

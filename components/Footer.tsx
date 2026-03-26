@@ -30,9 +30,9 @@ export default function Footer() {
           <div>
             <h4 className="text-xl font-bold mb-4">Contacto</h4>
             <ul className="space-y-2 text-gray-400 text-sm">
-              <li><i className="fas fa-map-marker-alt text-primary mr-2"></i> Dirección de la Iglesia</li>
-              <li><i className="fas fa-phone text-primary mr-2"></i> +1 234 567 890</li>
-              <li><i className="fas fa-envelope text-primary mr-2"></i> info@templojireh.com</li>
+              <li><i className="fas fa-map-marker-alt text-primary mr-2"></i> Presidente Alessandri #0498, La Granja</li>
+              <li><i className="fas fa-phone text-primary mr-2"></i> +56 9 5726 8552</li>
+              <li><i className="fas fa-envelope text-primary mr-2"></i> jirehchurch52@gmail.com</li>
             </ul>
           </div>
 

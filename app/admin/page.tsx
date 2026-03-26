@@ -98,6 +98,12 @@ export default function AdminDashboard() {
           >
             <i className="fas fa-newspaper w-5"></i> Blog
           </Link>
+          <Link
+            href="/admin/usuarios"
+            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-white/5 transition-colors"
+          >
+            <i className="fas fa-users w-5"></i> Usuarios
+          </Link>
           <div className="border-t border-white/10 my-4"></div>
           <Link
             href="/"

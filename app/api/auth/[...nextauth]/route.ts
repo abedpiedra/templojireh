@@ -17,28 +17,32 @@ const handler = NextAuth({
           return null
         }
 
-        await connectDB()
+        try {
+          await connectDB()
 
-        const user = await User.findOne({
-          email: credentials.email,
-          activo: true
-        })
+          const user = await User.findOne({
+            email: credentials.email,
+            activo: true
+          })
 
-        if (!user) {
+          if (!user) {
+            return null
+          }
+
+          const isValid = await bcrypt.compare(credentials.password, user.password)
+
+          if (!isValid) {
+            return null
+          }
+
+          return {
+            id: user._id.toString(),
+            email: user.email,
+            name: user.nombre,
+          }
+        } catch (error) {
+          console.error('Auth error:', error)
           return null
-        }
-
-        const isValid = await bcrypt.compare(credentials.password, user.password)
-
-        if (!isValid) {
-          return null
-        }
-
-        return {
-          id: user._id.toString(),
-          email: user.email,
-          name: user.nombre,
-          role: user.rol,
         }
       },
     }),
@@ -48,23 +52,9 @@ const handler = NextAuth({
   },
   session: {
     strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id
-        token.role = (user as any).role
-      }
-      return token
-    },
-    async session({ session, token }) {
-      if (session.user) {
-        (session.user as any).id = (token as any).id
-        (session.user as any).role = (token as any).role
-      }
-      return session
-    },
-  },
+  secret: process.env.NEXTAUTH_SECRET,
 })
 
 export { handler as GET, handler as POST }

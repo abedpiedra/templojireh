@@ -18,15 +18,6 @@ async function getPosts() {
 export default async function BlogPage() {
   const posts = await getPosts()
 
-  // Datos de ejemplo si no hay posts en la BD
-  const postsDefault = [
-    { _id: '1', titulo: 'La Fe que Mueve Montañas', slug: 'la-fe-que-mueve-montanas', fecha: '2024-03-25', categoria: 'Reflexiones', autor: 'Pastor Luis Luengo', excerpt: 'Descubre cómo la fe genuina puede transformar las circunstancias más difíciles de tu vida.', imagen: 'https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=800' },
-    { _id: '2', titulo: 'El Poder de la Oración', slug: 'el-poder-de-la-oracion', fecha: '2024-03-20', categoria: 'Enseñanzas', autor: 'Pastor Luis Luengo', excerpt: 'La oración es nuestra conexión directa con el Padre celestial.', imagen: 'https://images.unsplash.com/photo-1499209974431-9dddcece7f88?w=800' },
-    { _id: '3', titulo: 'Fortaleciendo los Lazos Familiares', slug: 'fortaleciendo-lazos-familiares', fecha: '2024-03-15', categoria: 'Familia', autor: 'Pastor Luis Luengo', excerpt: 'La familia es el núcleo de nuestra sociedad y la base de nuestra fe.', imagen: 'https://images.unsplash.com/photo-1529070538774-1843cb3265df?w=800' },
-  ]
-
-  const postsToShow = posts.length > 0 ? posts : postsDefault
-
   return (
     <>
       <Header />
@@ -37,18 +28,25 @@ export default async function BlogPage() {
           <div className="grid lg:grid-cols-3 gap-8">
             {/* Blog Posts */}
             <div className="lg:col-span-2 space-y-8">
-              {postsToShow.map((post: any) => (
-                <BlogCard
-                  key={post._id}
-                  titulo={post.titulo}
-                  slug={post.slug}
-                  fecha={post.fecha}
-                  categoria={post.categoria}
-                  autor={post.autor}
-                  excerpt={post.excerpt}
-                  imagen={post.imagen}
-                />
-              ))}
+              {posts.length === 0 ? (
+                <div className="text-center py-16">
+                  <i className="fas fa-newspaper text-6xl text-gray-300 mb-4"></i>
+                  <p className="text-gray-500 text-lg">No hay artículos publicados</p>
+                </div>
+              ) : (
+                posts.map((post: any) => (
+                  <BlogCard
+                    key={post._id}
+                    titulo={post.titulo}
+                    slug={post.slug}
+                    fecha={post.fecha}
+                    categoria={post.categoria}
+                    autor={post.autor}
+                    excerpt={post.excerpt}
+                    imagen={post.imagen}
+                  />
+                ))
+              )}
             </div>
 
             {/* Sidebar */}

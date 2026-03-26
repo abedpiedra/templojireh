@@ -136,6 +136,7 @@ function AdminBlogContent() {
           <Link href="/admin/sermones" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-white/5"><i className="fas fa-bible w-5"></i> Sermones</Link>
           <Link href="/admin/eventos" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-white/5"><i className="fas fa-calendar-alt w-5"></i> Eventos</Link>
           <Link href="/admin/blog" className="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/20 text-primary"><i className="fas fa-newspaper w-5"></i> Blog</Link>
+          <Link href="/admin/usuarios" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-white/5"><i className="fas fa-users w-5"></i> Usuarios</Link>
           <div className="border-t border-white/10 my-4"></div>
           <Link href="/" className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-white/5"><i className="fas fa-globe w-5"></i> Ver Sitio</Link>
         </nav>

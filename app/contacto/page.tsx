@@ -1,25 +1,31 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
-import PageHeader from '@/components/PageHeader'
+import { useState } from "react";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import PageHeader from "@/components/PageHeader";
 
 export default function ContactoPage() {
   const [formData, setFormData] = useState({
-    nombre: '',
-    email: '',
-    telefono: '',
-    asunto: '',
-    mensaje: '',
-  })
+    nombre: "",
+    email: "",
+    telefono: "",
+    asunto: "",
+    mensaje: "",
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     // Aquí iría la lógica para enviar el formulario
-    alert('Mensaje enviado correctamente. Nos pondremos en contacto pronto.')
-    setFormData({ nombre: '', email: '', telefono: '', asunto: '', mensaje: '' })
-  }
+    alert("Mensaje enviado correctamente. Nos pondremos en contacto pronto.");
+    setFormData({
+      nombre: "",
+      email: "",
+      telefono: "",
+      asunto: "",
+      mensaje: "",
+    });
+  };
 
   return (
     <>
@@ -32,19 +38,42 @@ export default function ContactoPage() {
             {/* Contact Info */}
             <div className="space-y-6">
               {[
-                { icon: 'fa-map-marker-alt', title: 'Dirección', lines: ['Calle Principal #123', 'Ciudad, Estado 12345'] },
-                { icon: 'fa-phone', title: 'Teléfono', lines: ['+1 234 567 890', '+1 234 567 891'] },
-                { icon: 'fa-envelope', title: 'Email', lines: ['info@templojireh.com', 'pastor@templojireh.com'] },
-                { icon: 'fa-clock', title: 'Horarios de Oficina', lines: ['Lunes a Viernes: 9:00 AM - 5:00 PM', 'Sábado: 9:00 AM - 12:00 PM'] },
+                {
+                  icon: "fa-map-marker-alt",
+                  title: "Dirección",
+                  lines: ["Presidente Alessandri #0498", "La Granja, Santiago"],
+                },
+                {
+                  icon: "fa-phone",
+                  title: "Teléfono",
+                  lines: ["+56 9 5726 8552"],
+                },
+                {
+                  icon: "fa-envelope",
+                  title: "Email",
+                  lines: ["jirehchurch52@gmail.com"],
+                },
+                {
+                  icon: "fa-clock",
+                  title: "Horarios de Servicio",
+                  lines: ["Domingos: 11:15 AM", "Martes y Jueves: 8:00 PM"],
+                },
               ].map((item, i) => (
-                <div key={i} className="bg-white rounded-xl shadow-lg p-6 flex gap-5">
+                <div
+                  key={i}
+                  className="bg-white rounded-xl shadow-lg p-6 flex gap-5"
+                >
                   <div className="w-14 h-14 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
                     <i className={`fas ${item.icon} text-white text-xl`}></i>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-dark mb-1">{item.title}</h4>
+                    <h4 className="font-semibold text-dark mb-1">
+                      {item.title}
+                    </h4>
                     {item.lines.map((line, j) => (
-                      <p key={j} className="text-gray-600 text-sm">{line}</p>
+                      <p key={j} className="text-gray-600 text-sm">
+                        {line}
+                      </p>
                     ))}
                   </div>
                 </div>
@@ -53,25 +82,35 @@ export default function ContactoPage() {
 
             {/* Contact Form */}
             <div className="bg-white rounded-xl shadow-lg p-8">
-              <h3 className="text-2xl font-semibold text-dark mb-6">Envíanos un Mensaje</h3>
+              <h3 className="text-2xl font-semibold text-dark mb-6">
+                Envíanos un Mensaje
+              </h3>
               <form onSubmit={handleSubmit}>
                 <div className="grid md:grid-cols-2 gap-4 mb-4">
                   <div>
-                    <label className="block text-gray-700 font-medium mb-2">Nombre</label>
+                    <label className="block text-gray-700 font-medium mb-2">
+                      Nombre
+                    </label>
                     <input
                       type="text"
                       value={formData.nombre}
-                      onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, nombre: e.target.value })
+                      }
                       className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors"
                       required
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-700 font-medium mb-2">Email</label>
+                    <label className="block text-gray-700 font-medium mb-2">
+                      Email
+                    </label>
                     <input
                       type="email"
                       value={formData.email}
-                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
                       className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors"
                       required
                     />
@@ -79,19 +118,27 @@ export default function ContactoPage() {
                 </div>
                 <div className="grid md:grid-cols-2 gap-4 mb-4">
                   <div>
-                    <label className="block text-gray-700 font-medium mb-2">Teléfono</label>
+                    <label className="block text-gray-700 font-medium mb-2">
+                      Teléfono
+                    </label>
                     <input
                       type="tel"
                       value={formData.telefono}
-                      onChange={(e) => setFormData({ ...formData, telefono: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, telefono: e.target.value })
+                      }
                       className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-700 font-medium mb-2">Asunto</label>
+                    <label className="block text-gray-700 font-medium mb-2">
+                      Asunto
+                    </label>
                     <select
                       value={formData.asunto}
-                      onChange={(e) => setFormData({ ...formData, asunto: e.target.value })}
+                      onChange={(e) =>
+                        setFormData({ ...formData, asunto: e.target.value })
+                      }
                       className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors"
                     >
                       <option value="">Seleccionar...</option>
@@ -104,10 +151,14 @@ export default function ContactoPage() {
                   </div>
                 </div>
                 <div className="mb-6">
-                  <label className="block text-gray-700 font-medium mb-2">Mensaje</label>
+                  <label className="block text-gray-700 font-medium mb-2">
+                    Mensaje
+                  </label>
                   <textarea
                     value={formData.mensaje}
-                    onChange={(e) => setFormData({ ...formData, mensaje: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, mensaje: e.target.value })
+                    }
                     rows={5}
                     className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors resize-none"
                     required
@@ -127,12 +178,27 @@ export default function ContactoPage() {
         <div className="container mx-auto px-4">
           <div className="grid md:grid-cols-4">
             {[
-              { icon: 'fa-sun', title: 'Servicio Dominical', time: 'Domingos 10:00 AM' },
-              { icon: 'fa-book-bible', title: 'Estudio Bíblico', time: 'Miércoles 7:00 PM' },
-              { icon: 'fa-praying-hands', title: 'Oración', time: 'Viernes 7:00 PM' },
-              { icon: 'fa-users', title: 'Jóvenes', time: 'Sábados 6:00 PM' },
+              {
+                icon: "fa-sun",
+                title: "Servicio Dominical",
+                time: "Domingos 10:00 AM",
+              },
+              {
+                icon: "fa-book-bible",
+                title: "Estudio Bíblico",
+                time: "Miércoles 7:00 PM",
+              },
+              {
+                icon: "fa-praying-hands",
+                title: "Oración",
+                time: "Viernes 7:00 PM",
+              },
+              { icon: "fa-users", title: "Jóvenes", time: "Sábados 6:00 PM" },
             ].map((item, i) => (
-              <div key={i} className="text-white text-center py-10 px-6 border-r border-white/20 last:border-r-0">
+              <div
+                key={i}
+                className="text-white text-center py-10 px-6 border-r border-white/20 last:border-r-0"
+              >
                 <i className={`fas ${item.icon} text-4xl mb-4`}></i>
                 <h3 className="text-lg font-semibold mb-1">{item.title}</h3>
                 <p className="text-sm opacity-90">{item.time}</p>
@@ -153,5 +219,5 @@ export default function ContactoPage() {
 
       <Footer />
     </>
-  )
+  );
 }
