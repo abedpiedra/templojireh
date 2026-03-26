@@ -6,6 +6,8 @@ import connectDB from "@/lib/mongodb";
 import Sermon from "@/lib/models/Sermon";
 import Evento from "@/lib/models/Evento";
 
+export const dynamic = 'force-dynamic'
+
 async function getData() {
   try {
     await connectDB();

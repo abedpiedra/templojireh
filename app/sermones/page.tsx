@@ -5,6 +5,8 @@ import SermonCard from '@/components/SermonCard'
 import connectDB from '@/lib/mongodb'
 import Sermon from '@/lib/models/Sermon'
 
+export const dynamic = 'force-dynamic'
+
 async function getSermones() {
   try {
     await connectDB()

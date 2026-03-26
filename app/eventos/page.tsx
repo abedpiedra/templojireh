@@ -5,6 +5,8 @@ import EventoCard from '@/components/EventoCard'
 import connectDB from '@/lib/mongodb'
 import Evento from '@/lib/models/Evento'
 
+export const dynamic = 'force-dynamic'
+
 async function getEventos() {
   try {
     await connectDB()
