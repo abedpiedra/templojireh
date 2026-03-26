@@ -1,125 +1,150 @@
-'use client'
+"use client";
 
-import { useState, useEffect, useRef } from 'react'
-import Header from '@/components/Header'
-import Footer from '@/components/Footer'
-import PageHeader from '@/components/PageHeader'
+import { useState, useEffect, useRef } from "react";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import PageHeader from "@/components/PageHeader";
 
 interface LiveData {
-  isLive: boolean
-  videoId?: string
-  title?: string
-  thumbnail?: string
-  description?: string
+  isLive: boolean;
+  videoId?: string;
+  title?: string;
+  thumbnail?: string;
+  description?: string;
 }
 
 interface Video {
-  videoId: string
-  title: string
-  thumbnail: string
-  description: string
-  publishedAt: string
+  videoId: string;
+  title: string;
+  thumbnail: string;
+  description: string;
+  publishedAt: string;
 }
 
-type FilterType = 'todos' | 'semana' | 'mes' | 'año'
+type FilterType = "todos" | "semana" | "mes" | "fecha";
+
+const MONTHS = [
+  "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+];
 
 export default function EnVivoPage() {
-  const [liveData, setLiveData] = useState<LiveData>({ isLive: false })
-  const [videos, setVideos] = useState<Video[]>([])
-  const [filteredVideos, setFilteredVideos] = useState<Video[]>([])
-  const [loading, setLoading] = useState(true)
-  const [activeFilter, setActiveFilter] = useState<FilterType>('todos')
-  const carouselRef = useRef<HTMLDivElement>(null)
+  const [liveData, setLiveData] = useState<LiveData>({ isLive: false });
+  const [videos, setVideos] = useState<Video[]>([]);
+  const [filteredVideos, setFilteredVideos] = useState<Video[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [activeFilter, setActiveFilter] = useState<FilterType>("todos");
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
+  const [availableYears, setAvailableYears] = useState<number[]>([]);
+  const carouselRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const [liveRes, videosRes] = await Promise.all([
-          fetch('/api/youtube/live'),
-          fetch('/api/youtube/videos')
-        ])
+          fetch("/api/youtube/live"),
+          fetch("/api/youtube/videos"),
+        ]);
 
-        const liveJson = await liveRes.json()
-        const videosJson = await videosRes.json()
+        const liveJson = await liveRes.json();
+        const videosJson = await videosRes.json();
 
-        setLiveData(liveJson)
-        setVideos(videosJson.videos || [])
-        setFilteredVideos(videosJson.videos || [])
+        setLiveData(liveJson);
+        const videoList = videosJson.videos || [];
+        setVideos(videoList);
+        setFilteredVideos(videoList);
+
+        // Extract available years from videos
+        const yearsSet = new Set(videoList.map((v: Video) => new Date(v.publishedAt).getFullYear()));
+        const years = Array.from(yearsSet) as number[];
+        setAvailableYears(years.sort((a: number, b: number) => b - a));
       } catch (error) {
-        console.error('Error fetching data:', error)
+        console.error("Error fetching data:", error);
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchData()
+    fetchData();
 
     // Verificar cada 30 segundos si hay transmisión en vivo
     const interval = setInterval(async () => {
       try {
-        const res = await fetch('/api/youtube/live')
-        const data = await res.json()
-        setLiveData(data)
+        const res = await fetch("/api/youtube/live");
+        const data = await res.json();
+        setLiveData(data);
       } catch (error) {
-        console.error('Error checking live status:', error)
+        console.error("Error checking live status:", error);
       }
-    }, 30000)
+    }, 30000);
 
-    return () => clearInterval(interval)
-  }, [])
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
-    filterVideos(activeFilter)
-  }, [activeFilter, videos])
+    applyFilters();
+  }, [activeFilter, selectedYear, selectedMonth, videos]);
 
-  const filterVideos = (filter: FilterType) => {
-    const now = new Date()
-    let filtered = [...videos]
+  const applyFilters = () => {
+    const now = new Date();
+    let filtered = [...videos];
 
-    switch (filter) {
-      case 'semana':
-        const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
-        filtered = videos.filter(v => new Date(v.publishedAt) >= oneWeekAgo)
-        break
-      case 'mes':
-        const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-        filtered = videos.filter(v => new Date(v.publishedAt) >= oneMonthAgo)
-        break
-      case 'año':
-        const oneYearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000)
-        filtered = videos.filter(v => new Date(v.publishedAt) >= oneYearAgo)
-        break
+    switch (activeFilter) {
+      case "semana":
+        const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        filtered = videos.filter((v) => new Date(v.publishedAt) >= oneWeekAgo);
+        break;
+      case "mes":
+        const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        filtered = videos.filter((v) => new Date(v.publishedAt) >= oneMonthAgo);
+        break;
+      case "fecha":
+        filtered = videos.filter((v) => {
+          const date = new Date(v.publishedAt);
+          const matchesYear = date.getFullYear() === selectedYear;
+          const matchesMonth = selectedMonth === null || date.getMonth() === selectedMonth;
+          return matchesYear && matchesMonth;
+        });
+        break;
       default:
-        filtered = videos
+        filtered = videos;
     }
 
-    setFilteredVideos(filtered)
-  }
+    setFilteredVideos(filtered);
+  };
+
+  const handleFilterChange = (filter: FilterType) => {
+    setActiveFilter(filter);
+    if (filter !== "fecha") {
+      setSelectedMonth(null);
+    }
+  };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('es-CL', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric'
-    })
-  }
+    return new Date(dateString).toLocaleDateString("es-CL", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  };
 
-  const scroll = (direction: 'left' | 'right') => {
+  const scroll = (direction: "left" | "right") => {
     if (carouselRef.current) {
-      const scrollAmount = 320 // Width of one card + gap
+      const scrollAmount = 320; // Width of one card + gap
       carouselRef.current.scrollBy({
-        left: direction === 'left' ? -scrollAmount : scrollAmount,
-        behavior: 'smooth'
-      })
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
+      });
     }
-  }
+  };
 
   const filters: { key: FilterType; label: string }[] = [
-    { key: 'todos', label: 'Todos' },
-    { key: 'semana', label: 'Esta semana' },
-    { key: 'mes', label: 'Este mes' },
-    { key: 'año', label: 'Este año' },
-  ]
+    { key: "todos", label: "Todos" },
+    { key: "semana", label: "Esta semana" },
+    { key: "mes", label: "Este mes" },
+    { key: "fecha", label: "Por fecha" },
+  ];
 
   return (
     <>
@@ -154,7 +179,9 @@ export default function EnVivoPage() {
                 </div>
               </div>
               <div className="bg-white p-6 rounded-xl shadow-lg mt-4">
-                <h2 className="text-2xl font-bold text-dark mb-2">{liveData.title}</h2>
+                <h2 className="text-2xl font-bold text-dark mb-2">
+                  {liveData.title}
+                </h2>
                 <p className="text-gray-600">{liveData.description}</p>
               </div>
             </div>
@@ -163,8 +190,12 @@ export default function EnVivoPage() {
               <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gray-200 flex items-center justify-center">
                 <i className="fas fa-video-slash text-4xl text-gray-400"></i>
               </div>
-              <h2 className="text-2xl font-bold text-dark mb-2">No hay transmisión en vivo</h2>
-              <p className="text-gray-500 mb-6">Vuelve pronto o revisa nuestras transmisiones anteriores</p>
+              <h2 className="text-2xl font-bold text-dark mb-2">
+                No hay transmisión en vivo
+              </h2>
+              <p className="text-gray-500 mb-6">
+                Vuelve pronto o revisa nuestras transmisiones anteriores
+              </p>
               <a
                 href="https://www.youtube.com/@TemploJirehTV?sub_confirmation=1"
                 target="_blank"
@@ -187,21 +218,52 @@ export default function EnVivoPage() {
           </div>
 
           {/* Filters */}
-          <div className="flex flex-wrap justify-center gap-3 mb-10">
+          <div className="flex flex-wrap justify-center gap-3 mb-6">
             {filters.map((filter) => (
               <button
                 key={filter.key}
-                onClick={() => setActiveFilter(filter.key)}
+                onClick={() => handleFilterChange(filter.key)}
                 className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${
                   activeFilter === filter.key
-                    ? 'bg-primary text-white'
-                    : 'bg-white text-gray-600 shadow hover:bg-primary hover:text-white'
+                    ? "bg-primary text-white"
+                    : "bg-white text-gray-600 shadow hover:bg-primary hover:text-white"
                 }`}
               >
                 {filter.label}
               </button>
             ))}
           </div>
+
+          {/* Year and Month selectors */}
+          {activeFilter === "fecha" && (
+            <div className="flex flex-wrap justify-center gap-4 mb-10">
+              <div className="flex items-center gap-2">
+                <label className="text-gray-600 font-medium">Año:</label>
+                <select
+                  value={selectedYear}
+                  onChange={(e) => setSelectedYear(Number(e.target.value))}
+                  className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none"
+                >
+                  {availableYears.map((year) => (
+                    <option key={year} value={year}>{year}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <label className="text-gray-600 font-medium">Mes:</label>
+                <select
+                  value={selectedMonth ?? ""}
+                  onChange={(e) => setSelectedMonth(e.target.value === "" ? null : Number(e.target.value))}
+                  className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none"
+                >
+                  <option value="">Todos los meses</option>
+                  {MONTHS.map((month, index) => (
+                    <option key={index} value={index}>{month}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          )}
 
           {filteredVideos.length === 0 ? (
             <div className="text-center py-12">
@@ -214,13 +276,13 @@ export default function EnVivoPage() {
               {filteredVideos.length > 3 && (
                 <>
                   <button
-                    onClick={() => scroll('left')}
+                    onClick={() => scroll("left")}
                     className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-white shadow-lg rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-colors -ml-4 hidden md:flex"
                   >
                     <i className="fas fa-chevron-left"></i>
                   </button>
                   <button
-                    onClick={() => scroll('right')}
+                    onClick={() => scroll("right")}
                     className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-white shadow-lg rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-colors -mr-4 hidden md:flex"
                   >
                     <i className="fas fa-chevron-right"></i>
@@ -232,9 +294,9 @@ export default function EnVivoPage() {
               <div
                 ref={carouselRef}
                 className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide"
-                style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
               >
-                {filteredVideos.slice(0, 12).map((video) => (
+                {filteredVideos.map((video) => (
                   <a
                     key={video.videoId}
                     href={`https://www.youtube.com/watch?v=${video.videoId}`}
@@ -259,7 +321,9 @@ export default function EnVivoPage() {
                         <i className="fas fa-calendar mr-1"></i>
                         {formatDate(video.publishedAt)}
                       </p>
-                      <h3 className="font-semibold text-dark text-sm line-clamp-2">{video.title}</h3>
+                      <h3 className="font-semibold text-dark text-sm line-clamp-2">
+                        {video.title}
+                      </h3>
                     </div>
                   </a>
                 ))}
@@ -277,7 +341,7 @@ export default function EnVivoPage() {
 
           <div className="text-center mt-10">
             <a
-              href="https://www.youtube.com/@TemploJirehTV/videos"
+              href="https://www.youtube.com/@TemploJirehTV/streams"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-primary inline-flex items-center gap-2"
@@ -290,5 +354,5 @@ export default function EnVivoPage() {
 
       <Footer />
     </>
-  )
+  );
 }

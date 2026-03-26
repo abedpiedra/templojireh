@@ -11,8 +11,8 @@ export async function GET() {
       return NextResponse.json({ videos: [], error: 'API key not configured' })
     }
 
-    // Obtener videos recientes del canal (incluye directos pasados)
-    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CHANNEL_ID}&type=video&order=date&maxResults=12&key=${YOUTUBE_API_KEY}`
+    // Obtener todos los videos del canal (máximo 50 por página)
+    const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CHANNEL_ID}&type=video&order=date&maxResults=50&key=${YOUTUBE_API_KEY}`
 
     const response = await fetch(searchUrl, { cache: 'no-store' })
     const data = await response.json()
