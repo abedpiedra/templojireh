@@ -108,16 +108,16 @@ export default function Header() {
                     href={link.href}
                     className={`block py-3 md:py-0 font-medium transition-colors hover:text-primary ${
                       pathname === link.href ? "text-primary" : "text-dark"
-                    } ${link.isLive && isLive ? "flex items-center gap-2" : ""}`}
+                    } ${link.isLive ? "flex items-center gap-1.5" : ""}`}
                     onClick={() => setIsMenuOpen(false)}
                   >
+                    {link.label}
                     {link.isLive && isLive && (
-                      <span className="flex items-center gap-1 bg-red-600 text-white text-xs px-2 py-0.5 rounded-full">
-                        <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                        EN VIVO
+                      <span className="relative flex h-2.5 w-2.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600"></span>
                       </span>
                     )}
-                    {link.label}
                   </Link>
                 </li>
               ))}
