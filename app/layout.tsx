@@ -4,7 +4,7 @@ import Providers from "@/components/Providers";
 
 export const metadata: Metadata = {
   title: {
-    default: "Templo Jireh | Iglesia Cristiana en La Granja, Santiago",
+    default: "Templo Jireh",
     template: "%s | Templo Jireh",
   },
   description:
@@ -55,7 +55,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary",
     title: "Templo Jireh | Iglesia Cristiana",
-    description: "Iglesia cristiana evangélica en La Granja, Santiago de Chile.",
+    description:
+      "Iglesia cristiana evangélica en La Granja, Santiago de Chile.",
     images: ["/logo.png"],
   },
   robots: {
