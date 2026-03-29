@@ -12,11 +12,11 @@ export default function Header() {
   useEffect(() => {
     const checkLiveStatus = async () => {
       try {
-        const res = await fetch('/api/youtube/live');
+        const res = await fetch("/api/youtube/live");
         const data = await res.json();
         setIsLive(data.isLive);
       } catch (error) {
-        console.error('Error checking live status:', error);
+        console.error("Error checking live status:", error);
       }
     };
 
@@ -29,8 +29,8 @@ export default function Header() {
     { href: "/", label: "Inicio" },
     { href: "/nosotros", label: "Nosotros" },
     { href: "/sermones", label: "Sermones" },
-    { href: "/eventos", label: "Eventos" },
-    { href: "/en-vivo", label: "En Vivo", isLive: true },
+    { href: "/en-vivo", label: "Transmisiones", isLive: true },
+    { href: "/redes", label: "Redes" },
     { href: "/contacto", label: "Contacto" },
   ];
 

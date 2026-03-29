@@ -145,7 +145,7 @@ export default function NosotrosPage() {
               {
                 name: "Magdalena Medina",
                 role: "Pastora",
-                img: "",
+                img: null,
               },
               {
                 name: "Dominique Cisterna",
@@ -155,17 +155,23 @@ export default function NosotrosPage() {
               {
                 name: "Evelyn Perez",
                 role: "Superintendente Escuela Dominical",
-                img: "",
+                img: null,
               },
             ].map((person, i) => (
               <div key={i} className="text-center">
                 <div className="relative w-48 h-48 mx-auto mb-4 rounded-full overflow-hidden border-4 border-primary">
-                  <Image
-                    src={person.img}
-                    alt={person.name}
-                    fill
-                    className="object-cover"
-                  />
+                  {person.img ? (
+                    <Image
+                      src={person.img}
+                      alt={person.name}
+                      fill
+                      className="object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                      <i className="fas fa-user text-6xl text-gray-400"></i>
+                    </div>
+                  )}
                 </div>
                 <h3 className="text-lg font-semibold text-dark">
                   {person.name}

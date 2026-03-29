@@ -45,10 +45,18 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/eventos"
+                  href="/en-vivo"
                   className="text-gray-400 hover:text-primary transition-colors"
                 >
-                  Eventos
+                  Transmisiones
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/redes"
+                  className="text-gray-400 hover:text-primary transition-colors"
+                >
+                  Redes
                 </Link>
               </li>
               <li>

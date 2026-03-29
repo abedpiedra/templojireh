@@ -4,26 +4,23 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import connectDB from "@/lib/mongodb";
 import Sermon from "@/lib/models/Sermon";
-import Evento from "@/lib/models/Evento";
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";
 
 async function getData() {
   try {
     await connectDB();
     const sermones = await Sermon.find({}).sort({ fecha: -1 }).limit(3).lean();
-    const eventos = await Evento.find({}).sort({ fecha: 1 }).limit(3).lean();
     return {
       sermones: JSON.parse(JSON.stringify(sermones)),
-      eventos: JSON.parse(JSON.stringify(eventos)),
     };
   } catch (error) {
-    return { sermones: [], eventos: [] };
+    return { sermones: [] };
   }
 }
 
 export default async function HomePage() {
-  const { sermones, eventos } = await getData();
+  const { sermones } = await getData();
 
   return (
     <>
@@ -151,7 +148,7 @@ export default async function HomePage() {
               <p className="section-subtitle">Nuestro Pastor</p>
               <h2 className="section-title">Pastor Luis Luengo</h2>
               <p className="text-gray-600 mb-4">
-                Con más de 20 años de ministerio, nuestro Pastor Luis Luengo ha
+                Con más de 40 años de ministerio, nuestro Pastor Luis Luengo ha
                 dedicado su vida a servir a Dios y a guiar a su congregación en
                 el camino de la fe.
               </p>
@@ -271,58 +268,6 @@ export default async function HomePage() {
           <div className="text-center mt-10">
             <Link href="/sermones" className="btn-primary">
               Ver Todos los Sermones
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Upcoming Events */}
-      <section className="py-20 bg-gray-50">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <p className="section-subtitle">Calendario</p>
-            <h2 className="section-title">Próximos Eventos</h2>
-          </div>
-          {eventos.length === 0 ? (
-            <div className="text-center py-12">
-              <i className="fas fa-calendar-alt text-5xl text-gray-300 mb-4"></i>
-              <p className="text-gray-500">No hay eventos programados</p>
-            </div>
-          ) : (
-            <div className="grid md:grid-cols-3 gap-8">
-              {eventos.map((evento: any, i: number) => {
-                const fecha = new Date(evento.fecha);
-                return (
-                  <div key={i} className="card p-6 flex gap-5">
-                    <div className="bg-primary text-white px-4 py-3 rounded-lg text-center flex-shrink-0">
-                      <span className="text-2xl font-bold block">
-                        {fecha.getDate()}
-                      </span>
-                      <span className="text-xs uppercase">
-                        {fecha.toLocaleDateString("es-ES", { month: "short" })}
-                      </span>
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-dark mb-2">
-                        {evento.titulo}
-                      </h3>
-                      <p className="text-gray-500 text-sm">
-                        <i className="fas fa-clock text-primary mr-1"></i>{" "}
-                        {evento.hora}
-                      </p>
-                      <p className="text-gray-500 text-sm">
-                        <i className="fas fa-map-marker-alt text-primary mr-1"></i>{" "}
-                        {evento.lugar}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-          <div className="text-center mt-10">
-            <Link href="/eventos" className="btn-primary">
-              Ver Todos los Eventos
             </Link>
           </div>
         </div>

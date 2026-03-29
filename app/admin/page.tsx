@@ -7,13 +7,12 @@ import Link from 'next/link'
 
 interface Stats {
   sermones: number
-  eventos: number
 }
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [stats, setStats] = useState<Stats>({ sermones: 0, eventos: 0 })
+  const [stats, setStats] = useState<Stats>({ sermones: 0 })
   const [activeSection, setActiveSection] = useState('dashboard')
 
   useEffect(() => {
@@ -28,17 +27,10 @@ export default function AdminDashboard() {
 
   const fetchStats = async () => {
     try {
-      const [sermonesRes, eventosRes] = await Promise.all([
-        fetch('/api/sermones'),
-        fetch('/api/eventos'),
-      ])
-      const [sermones, eventos] = await Promise.all([
-        sermonesRes.json(),
-        eventosRes.json(),
-      ])
+      const sermonesRes = await fetch('/api/sermones')
+      const sermones = await sermonesRes.json()
       setStats({
         sermones: Array.isArray(sermones) ? sermones.length : 0,
-        eventos: Array.isArray(eventos) ? eventos.length : 0,
       })
     } catch (error) {
       console.error('Error fetching stats:', error)
@@ -83,12 +75,6 @@ export default function AdminDashboard() {
             <i className="fas fa-bible w-5"></i> Sermones
           </Link>
           <Link
-            href="/admin/eventos"
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-white/5 transition-colors"
-          >
-            <i className="fas fa-calendar-alt w-5"></i> Eventos
-          </Link>
-          <Link
             href="/admin/usuarios"
             className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-white/5 transition-colors"
           >
@@ -126,20 +112,13 @@ export default function AdminDashboard() {
         </header>
 
         {/* Stats */}
-        <div className="grid md:grid-cols-3 gap-6 mb-8">
+        <div className="grid md:grid-cols-2 gap-6 mb-8">
           <div className="bg-white rounded-xl shadow-sm p-6">
             <div className="w-12 h-12 rounded-lg bg-green-100 text-green-600 flex items-center justify-center text-xl mb-4">
               <i className="fas fa-bible"></i>
             </div>
             <h3 className="text-3xl font-bold text-dark">{stats.sermones}</h3>
             <p className="text-gray-500">Sermones</p>
-          </div>
-          <div className="bg-white rounded-xl shadow-sm p-6">
-            <div className="w-12 h-12 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-xl mb-4">
-              <i className="fas fa-calendar-alt"></i>
-            </div>
-            <h3 className="text-3xl font-bold text-dark">{stats.eventos}</h3>
-            <p className="text-gray-500">Eventos</p>
           </div>
           <div className="bg-white rounded-xl shadow-sm p-6">
             <div className="w-12 h-12 rounded-lg bg-pink-100 text-pink-600 flex items-center justify-center text-xl mb-4">
@@ -162,11 +141,11 @@ export default function AdminDashboard() {
               <p className="font-semibold">Nuevo Sermón</p>
             </Link>
             <Link
-              href="/admin/eventos?new=true"
-              className="p-6 bg-blue-500 text-white rounded-xl text-center hover:bg-blue-600 transition-colors"
+              href="/api/youtube/sync?token=manual"
+              className="p-6 bg-red-500 text-white rounded-xl text-center hover:bg-red-600 transition-colors"
             >
-              <i className="fas fa-plus text-2xl mb-2"></i>
-              <p className="font-semibold">Nuevo Evento</p>
+              <i className="fas fa-sync text-2xl mb-2"></i>
+              <p className="font-semibold">Sincronizar YouTube</p>
             </Link>
           </div>
         </div>
