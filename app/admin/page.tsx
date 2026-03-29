@@ -140,13 +140,25 @@ export default function AdminDashboard() {
               <i className="fas fa-plus text-2xl mb-2"></i>
               <p className="font-semibold">Nuevo Sermón</p>
             </Link>
-            <Link
-              href="/api/youtube/sync?token=manual"
+            <button
+              onClick={async () => {
+                try {
+                  const res = await fetch('/api/youtube/sync', { method: 'POST' })
+                  const data = await res.json()
+                  if (res.ok) {
+                    alert(`Sincronización exitosa: ${data.synced} videos sincronizados`)
+                  } else {
+                    alert('Error: ' + data.error)
+                  }
+                } catch {
+                  alert('Error al sincronizar')
+                }
+              }}
               className="p-6 bg-red-500 text-white rounded-xl text-center hover:bg-red-600 transition-colors"
             >
               <i className="fas fa-sync text-2xl mb-2"></i>
               <p className="font-semibold">Sincronizar YouTube</p>
-            </Link>
+            </button>
           </div>
         </div>
       </main>

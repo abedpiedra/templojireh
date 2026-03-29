@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
 import connectDB from '@/lib/mongodb'
 import YouTubeVideo from '@/lib/models/YouTubeVideo'
 
@@ -119,7 +120,11 @@ export async function POST(request: Request) {
     const token = searchParams.get('token')
     const source = searchParams.get('source') || 'rss' // 'rss' o 'api'
 
-    if (token !== process.env.SYNC_SECRET_TOKEN && token !== 'manual') {
+    // Verificar autenticación: token secreto O sesión de admin
+    const session = await getServerSession()
+    const isValidToken = token === process.env.SYNC_SECRET_TOKEN
+
+    if (!isValidToken && !session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
