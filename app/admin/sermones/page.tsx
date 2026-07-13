@@ -134,14 +134,14 @@ function AdminSermonesContent() {
   return (
     <>
       <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-dark">
+        <div className="flex flex-wrap justify-between items-center gap-4">
+          <h2 className="text-xl sm:text-2xl font-bold text-dark">
             <i className="fas fa-bible text-primary mr-3"></i>
             Gestion de Sermones
           </h2>
           <button
             onClick={() => setShowModal(true)}
-            className="px-6 py-3 bg-secondary text-white rounded-lg hover:bg-secondary-dark transition-colors"
+            className="w-full sm:w-auto px-6 py-3 bg-secondary text-white rounded-lg hover:bg-secondary-dark transition-colors"
           >
             <i className="fas fa-plus mr-2"></i> Agregar Sermon
           </button>
@@ -156,7 +156,8 @@ function AdminSermonesContent() {
             <p>Agrega tu primer sermon usando el boton de arriba</p>
           </div>
         ) : (
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[640px]">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-6 py-4 text-left text-gray-600 font-semibold">
@@ -215,6 +216,7 @@ function AdminSermonesContent() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
 
