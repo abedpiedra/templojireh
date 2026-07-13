@@ -4,7 +4,6 @@ import type { CSSProperties, FormEvent } from "react";
 import { useEffect, useState } from "react";
 
 const ASSET_BASE = "/invitacion-jovenes55/assets";
-const STORAGE_KEY = "templo-jireh-confirmaciones-demo";
 const EVENT_DATE = new Date("2026-08-21T20:00:00-04:00");
 const EVENT_END_DATE = new Date(EVENT_DATE.getTime() + 2 * 60 * 60 * 1000);
 const EVENT_LOCATION = "Templo Jireh, Presidente Alessandri #0498, La Granja";
@@ -206,12 +205,17 @@ export default function InvitationJovenes55Client() {
     setIsSubmitting(true);
 
     try {
-      const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-      stored.push({
-        ...data,
-        submittedAt: new Date().toISOString(),
+      const response = await fetch("/api/invitacion-jovenes55/confirmaciones", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
       });
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(stored));
+
+      if (!response.ok) {
+        throw new Error("No se pudo guardar la confirmacion.");
+      }
 
       setChurchName("");
       setWillAttend("");
@@ -452,7 +456,11 @@ export default function InvitationJovenes55Client() {
             <p className="field-error">{errors.estimatedYouth}</p>
           </div>
 
-          <button className="button button-submit" type="submit">
+          <button
+            className="button button-submit"
+            type="submit"
+            disabled={isSubmitting}
+          >
             {isSubmitting ? "Enviando..." : "Enviar confirmación"}
           </button>
           <p className="form-status" role="status" aria-live="polite">
