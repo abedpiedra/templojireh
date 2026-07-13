@@ -177,6 +177,89 @@ export default function AdminInvitacionJovenes55Page() {
     URL.revokeObjectURL(url)
   }
 
+  const exportPdf = async () => {
+    // Carga diferida para no incluir la libreria en el bundle inicial
+    const { default: jsPDF } = await import('jspdf')
+    const { default: autoTable } = await import('jspdf-autotable')
+
+    const doc = new jsPDF({ unit: 'mm', format: 'a4' })
+    const pageWidth = doc.internal.pageSize.getWidth()
+    const pageHeight = doc.internal.pageSize.getHeight()
+    const marginX = 14
+
+    // Encabezado de marca
+    doc.setFillColor(26, 26, 46) // dark
+    doc.rect(0, 0, pageWidth, 26, 'F')
+    doc.setTextColor(255, 255, 255)
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(16)
+    doc.text('Templo Jireh', marginX, 13)
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(11)
+    doc.setTextColor(209, 79, 66) // primary
+    doc.text('Confirmaciones Jovenes 55', marginX, 20)
+
+    doc.setTextColor(200, 200, 200)
+    doc.setFontSize(9)
+    doc.text(
+      `Generado: ${formatDate(new Date().toISOString())}`,
+      pageWidth - marginX,
+      13,
+      { align: 'right' },
+    )
+
+    // Resumen
+    doc.setTextColor(60, 60, 60)
+    doc.setFontSize(10)
+    doc.text(
+      `Respuestas: ${stats.total}     Si asisten: ${stats.attendingChurches}     No asisten: ${stats.notAttendingChurches}     Jovenes estimados: ${stats.estimatedYouth}`,
+      marginX,
+      36,
+    )
+
+    // Tabla tipo lista
+    autoTable(doc, {
+      startY: 42,
+      head: [['Fecha', 'Iglesia', 'Asiste', 'Jovenes']],
+      body: filteredConfirmations.map((confirmation) => [
+        formatDate(confirmation.createdAt),
+        confirmation.churchName,
+        confirmation.willAttend === 'yes' ? 'Si' : 'No',
+        String(confirmation.estimatedYouth),
+      ]),
+      styles: { fontSize: 9, cellPadding: 3, valign: 'middle' },
+      headStyles: {
+        fillColor: [209, 79, 66],
+        textColor: 255,
+        fontStyle: 'bold',
+      },
+      alternateRowStyles: { fillColor: [247, 247, 247] },
+      columnStyles: {
+        2: { halign: 'center', cellWidth: 22 },
+        3: { halign: 'center', cellWidth: 24 },
+      },
+      margin: { left: marginX, right: marginX },
+    })
+
+    // Pie de pagina con numeracion
+    const pageCount = doc.getNumberOfPages()
+    for (let page = 1; page <= pageCount; page += 1) {
+      doc.setPage(page)
+      doc.setFontSize(8)
+      doc.setTextColor(150, 150, 150)
+      doc.text(
+        `Pagina ${page} de ${pageCount}`,
+        pageWidth - marginX,
+        pageHeight - 8,
+        { align: 'right' },
+      )
+    }
+
+    doc.save(
+      `confirmaciones-jovenes55-${new Date().toISOString().slice(0, 10)}.pdf`,
+    )
+  }
+
   if (status === 'loading' || loading) {
     return (
       <div className="min-h-[60vh] flex items-center justify-center">
@@ -211,6 +294,13 @@ export default function AdminInvitacionJovenes55Page() {
               className="px-5 py-3 bg-secondary text-white rounded-lg hover:bg-secondary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <i className="fas fa-file-csv mr-2"></i> Exportar CSV
+            </button>
+            <button
+              onClick={exportPdf}
+              disabled={filteredConfirmations.length === 0}
+              className="px-5 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <i className="fas fa-file-pdf mr-2"></i> Exportar PDF
             </button>
           </div>
         </div>
