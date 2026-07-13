@@ -62,6 +62,7 @@ export default function AdminInvitacionJovenes55Page() {
   const [attendanceFilter, setAttendanceFilter] = useState<
     'all' | AttendanceValue
   >('all')
+  const [deletingId, setDeletingId] = useState<string | null>(null)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -113,6 +114,40 @@ export default function AdminInvitacionJovenes55Page() {
       return matchesSearch && matchesAttendance
     })
   }, [confirmations, search, attendanceFilter])
+
+  const handleDelete = async (confirmation: Confirmation) => {
+    const warning =
+      `Vas a eliminar la confirmacion de "${confirmation.churchName}".\n\n` +
+      'Esta accion es permanente y no se puede deshacer. ' +
+      'El registro se descontara de las estadisticas.\n\n' +
+      'Estas seguro de que deseas continuar?'
+
+    if (!confirm(warning)) {
+      return
+    }
+
+    setDeletingId(confirmation._id)
+    setError('')
+
+    try {
+      const res = await fetch(
+        `/api/invitacion-jovenes55/confirmaciones/${confirmation._id}`,
+        { method: 'DELETE' },
+      )
+      const data = await res.json().catch(() => null)
+
+      if (!res.ok) {
+        setError(data?.error || 'Error al eliminar la confirmacion')
+        return
+      }
+
+      await fetchConfirmations()
+    } catch (error) {
+      setError('Error de conexion')
+    } finally {
+      setDeletingId(null)
+    }
+  }
 
   const exportCsv = () => {
     const rows = [
@@ -275,6 +310,9 @@ export default function AdminInvitacionJovenes55Page() {
                   <th className="px-6 py-4 text-left text-gray-600 font-semibold">
                     Jovenes
                   </th>
+                  <th className="px-6 py-4 text-right text-gray-600 font-semibold">
+                    Acciones
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -299,6 +337,21 @@ export default function AdminInvitacionJovenes55Page() {
                     </td>
                     <td className="px-6 py-4 text-gray-700">
                       {confirmation.estimatedYouth}
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <button
+                        onClick={() => handleDelete(confirmation)}
+                        disabled={deletingId === confirmation._id}
+                        title="Eliminar confirmacion"
+                        aria-label={`Eliminar confirmacion de ${confirmation.churchName}`}
+                        className="px-3 py-2 bg-red-100 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {deletingId === confirmation._id ? (
+                          <i className="fas fa-spinner fa-spin"></i>
+                        ) : (
+                          <i className="fas fa-trash"></i>
+                        )}
+                      </button>
                     </td>
                   </tr>
                 ))}
