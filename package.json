@@ -14,6 +14,8 @@
   "description": "",
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "jspdf": "^4.2.1",
+    "jspdf-autotable": "^5.0.8",
     "mongoose": "^8.23.0",
     "next": "^14.2.35",
     "next-auth": "^4.24.13",
