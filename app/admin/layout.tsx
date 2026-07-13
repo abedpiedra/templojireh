@@ -1,6 +1,7 @@
 'use client'
 
 import { SessionProvider } from 'next-auth/react'
+import AdminShell from '@/components/AdminShell'
 
 export default function AdminLayout({
   children,
@@ -9,7 +10,7 @@ export default function AdminLayout({
 }) {
   return (
     <SessionProvider>
-      {children}
+      <AdminShell>{children}</AdminShell>
     </SessionProvider>
   )
 }
