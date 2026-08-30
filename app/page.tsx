@@ -76,7 +76,7 @@ export default function HomePage() {
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(100deg, rgba(16,16,18,0.95) 0%, rgba(16,16,18,0.74) 45%, rgba(123,18,42,0.42) 100%)",
+              "linear-gradient(100deg, rgba(28,28,34,0.95) 0%, rgba(28,28,34,0.74) 45%, rgba(105,13,36,0.48) 100%)",
           }}
           aria-hidden="true"
         />

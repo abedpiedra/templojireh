@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
@@ -138,19 +137,21 @@ export default function Header() {
         className="material material-edge-bottom scroll-edge sticky top-0 z-50 border-b border-separator"
       >
         <div className="container mx-auto px-4 h-[4.5rem] flex justify-between items-center gap-4">
-          {/* El isotipo ancla la identidad; el nombre queda como texto real */}
-          <Link href="/" className="pressable flex shrink-0 items-center gap-3">
-            <Image
-              src="/logo.png"
-              alt=""
-              width={40}
+          {/* Logotipo oficial: ya trae el nombre, no se duplica en texto.
+              El SVG se sirve tal cual, sin pasar por el optimizador. */}
+          <Link
+            href="/"
+            aria-label="Templo Jireh - Inicio"
+            className="pressable flex shrink-0 items-center"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo-templo-jireh-web.svg"
+              alt="Templo Jireh"
+              width={187}
               height={40}
-              priority
-              className="h-10 w-auto"
+              className="h-9 w-auto md:h-10"
             />
-            <span className="text-2xl font-bold tracking-[-0.02em] text-dark">
-              Templo <span className="text-primary">Jireh</span>
-            </span>
           </Link>
 
           {/* Navegacion de escritorio: el indicador activo es una pastilla,

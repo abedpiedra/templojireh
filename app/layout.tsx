@@ -1,19 +1,14 @@
 import type { Metadata, Viewport } from "next";
-import { Nunito_Sans } from "next/font/google";
+import { Montserrat } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
 
-// Nunito Sans: humanista, con eje optico real (opsz), asi la letra cambia de
-// forma segun el tamano en vez de escalarse igual en todos los niveles.
+// Montserrat: la tipografia que define el manual de marca.
 // Se carga con el pipeline de Next: sin salto de layout y con `display: swap`.
-const nunitoSans = Nunito_Sans({
+const montserrat = Montserrat({
   subsets: ["latin"],
-  axes: ["opsz"],
   display: "swap",
   variable: "--font-brand",
-  // Next no tiene metricas de ajuste para esta variable; el respaldo se
-  // declara a mano y se evita el aviso de override.
-  adjustFontFallback: false,
   fallback: ["-apple-system", "BlinkMacSystemFont", "system-ui", "sans-serif"],
 });
 
@@ -21,8 +16,8 @@ const nunitoSans = Nunito_Sans({
 // se integra con la pagina en lugar de cortarla.
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
-    { media: "(prefers-color-scheme: dark)", color: "#101012" },
+    { media: "(prefers-color-scheme: light)", color: "#d6122f" },
+    { media: "(prefers-color-scheme: dark)", color: "#1c1c22" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -54,10 +49,17 @@ export const metadata: Metadata = {
   authors: [{ name: "Templo Jireh" }],
   creator: "Templo Jireh",
   publisher: "Templo Jireh",
+  // Iconos oficiales del kit de marca, en los tamanos que pide cada sistema
   icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icono-32x32.png", type: "image/png", sizes: "32x32" },
+      { url: "/icono-96x96.png", type: "image/png", sizes: "96x96" },
+      { url: "/icono-256x256.png", type: "image/png", sizes: "256x256" },
+    ],
+    apple: [{ url: "/apple-touch-icon-180x180.png", sizes: "180x180" }],
   },
+  manifest: "/site.webmanifest",
   metadataBase: new URL("https://templojireh.cl"),
   alternates: {
     canonical: "/",
@@ -72,19 +74,19 @@ export const metadata: Metadata = {
     type: "website",
     images: [
       {
-        url: "/logo.png",
-        width: 512,
-        height: 512,
-        alt: "Templo Jireh Logo",
+        url: "/og-image-1200x630.png",
+        width: 1200,
+        height: 630,
+        alt: "Templo Jireh - Iglesia Cristiana Pentecostal de Chile",
       },
     ],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "Templo Jireh | Iglesia Cristiana",
     description:
       "Iglesia cristiana evangélica en La Granja, Santiago de Chile.",
-    images: ["/logo.png"],
+    images: ["/og-image-1200x630.png"],
   },
   robots: {
     index: true,
@@ -111,7 +113,7 @@ const jsonLd = {
   description:
     "Iglesia cristiana evangélica comprometida con llevar el mensaje de esperanza y salvación.",
   url: "https://templojireh.cl",
-  logo: "https://templojireh.cl/logo.png",
+  logo: "https://templojireh.cl/icono-256x256.png",
   image: "https://templojireh.cl/iglesia.png",
   telephone: "+56957268552",
   email: "jirehchurch52@gmail.com",
@@ -161,7 +163,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es" className={nunitoSans.variable}>
+    <html lang="es" className={montserrat.variable}>
       <head>
         {/* Iconografia servida desde el propio dominio: sin CDN de terceros
             bloqueando el primer pintado. */}

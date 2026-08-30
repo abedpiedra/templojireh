@@ -15,7 +15,7 @@ export default function PageHeader({ title, breadcrumb, description }: PageHeade
         className="absolute inset-0"
         style={{
           background:
-            'radial-gradient(110% 100% at 12% 0%, rgba(228,19,47,0.38) 0%, rgba(16,16,18,0) 58%), radial-gradient(80% 90% at 85% 10%, rgba(123,18,42,0.45) 0%, rgba(16,16,18,0) 62%), linear-gradient(160deg, #101012 0%, #26262b 100%)',
+            'radial-gradient(110% 100% at 12% 0%, rgba(255,74,95,0.34) 0%, rgba(28,28,34,0) 58%), radial-gradient(80% 90% at 85% 10%, rgba(105,13,36,0.55) 0%, rgba(28,28,34,0) 62%), linear-gradient(160deg, #1c1c22 0%, #3a3a44 100%)',
         }}
         aria-hidden="true"
       />

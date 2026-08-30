@@ -1,7 +1,6 @@
 'use client'
 
 import { signOut, useSession } from 'next-auth/react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -9,16 +8,10 @@ import { useSheet } from '@/lib/useSheet'
 
 const navItems = [
   { href: '/admin', label: 'Panel', icon: 'fas fa-gauge', exact: true },
-  {
-    href: '/admin/invitacion-jovenes55',
-    label: 'Jóvenes 55',
-    icon: 'fas fa-clipboard-check',
-  },
   { href: '/admin/usuarios', label: 'Usuarios', icon: 'fas fa-users' },
 ]
 
 const salidas = [
-  { href: '/invitacion-jovenes55', label: 'Ver invitación', icon: 'fas fa-arrow-up-right-from-square' },
   { href: '/', label: 'Ver sitio', icon: 'fas fa-globe' },
 ]
 
@@ -98,12 +91,16 @@ export default function AdminShell({
   )
 
   const encabezado = (
-    <div className="flex items-center gap-3 border-b border-white/10 p-5">
-      <Image src="/logo.png" alt="" width={32} height={32} className="h-8 w-auto" />
-      <div>
-        <p className="type-title-3 text-white">Templo Jireh</p>
-        <p className="type-caption text-white/45">Panel de administración</p>
-      </div>
+    <div className="border-b border-white/10 p-5">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/logo-templo-jireh-web-blanco.svg"
+        alt="Templo Jireh"
+        width={150}
+        height={32}
+        className="h-8 w-auto"
+      />
+      <p className="type-caption text-white/45 mt-2">Panel de administración</p>
     </div>
   )
 
@@ -112,7 +109,14 @@ export default function AdminShell({
       {/* Barra superior movil: capa translucida, el contenido pasa debajo */}
       <header className="material-dark fixed inset-x-0 top-0 z-40 flex h-16 items-center justify-between px-4 lg:hidden">
         <div className="flex items-center gap-2.5">
-          <Image src="/logo.png" alt="" width={26} height={26} className="h-6 w-auto" />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/isotipo-jireh-blanco.svg"
+            alt=""
+            width={24}
+            height={24}
+            className="h-6 w-auto"
+          />
           <span className="type-title-3 vibrant-on-dark">Panel</span>
         </div>
         <button

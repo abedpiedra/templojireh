@@ -14,16 +14,12 @@
   "description": "",
   "dependencies": {
     "bcryptjs": "^3.0.3",
-    "jspdf": "^4.2.1",
-    "jspdf-autotable": "^5.0.8",
     "mongoose": "^8.23.0",
     "next": "^14.2.35",
     "next-auth": "^4.24.13",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "resend": "^6.9.4",
-    "tailwindcss": "^3.4.19",
-    "zod": "^4.3.6"
+    "tailwindcss": "^3.4.19"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

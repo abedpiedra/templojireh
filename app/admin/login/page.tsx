@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
-import Image from 'next/image'
 import Link from 'next/link'
 
 export default function AdminLoginPage() {
@@ -44,8 +43,9 @@ export default function AdminLoginPage() {
 
       <div className="sheet-surface relative w-full max-w-md p-8 md:p-10">
         <div className="mb-8 text-center">
-          <Image
-            src="/logo.png"
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/isotipo-jireh.svg"
             alt="Templo Jireh"
             width={56}
             height={56}

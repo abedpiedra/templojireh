@@ -6,8 +6,8 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 
 interface Stats {
-  confirmaciones: number
-  jovenesEstimados: number
+  usuarios: number
+  usuariosActivos: number
 }
 
 type SyncState =
@@ -19,10 +19,7 @@ type SyncState =
 export default function AdminDashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [stats, setStats] = useState<Stats>({
-    confirmaciones: 0,
-    jovenesEstimados: 0,
-  })
+  const [stats, setStats] = useState<Stats>({ usuarios: 0, usuariosActivos: 0 })
   const [sync, setSync] = useState<SyncState>({ estado: 'inactivo' })
 
   useEffect(() => {
@@ -33,17 +30,14 @@ export default function AdminDashboard() {
 
   const fetchStats = useCallback(async () => {
     try {
-      const confirmacionesRes = await fetch(
-        '/api/invitacion-jovenes55/confirmaciones',
-        { cache: 'no-store' },
-      )
-      const confirmaciones = confirmacionesRes.ok
-        ? await confirmacionesRes.json()
-        : null
+      const res = await fetch('/api/users')
+      const usuarios = await res.json()
+      const lista = Array.isArray(usuarios) ? usuarios : []
 
       setStats({
-        confirmaciones: confirmaciones?.stats?.total || 0,
-        jovenesEstimados: confirmaciones?.stats?.estimatedYouth || 0,
+        usuarios: lista.length,
+        usuariosActivos: lista.filter((u: { activo?: boolean }) => u.activo)
+          .length,
       })
     } catch (error) {
       console.error('Error fetching stats:', error)
@@ -79,8 +73,8 @@ export default function AdminDashboard() {
     return (
       <div className="space-y-6">
         <div className="h-20 animate-pulse rounded-card bg-ink-quaternary/20" />
-        <div className="grid gap-6 md:grid-cols-3">
-          {[0, 1, 2].map((i) => (
+        <div className="grid gap-6 sm:grid-cols-2">
+          {[0, 1].map((i) => (
             <div
               key={i}
               className="h-32 animate-pulse rounded-card bg-ink-quaternary/20"
@@ -96,15 +90,11 @@ export default function AdminDashboard() {
   }
 
   const tarjetas = [
+    { valor: stats.usuarios, label: 'Usuarios del panel', icon: 'fas fa-users' },
     {
-      valor: stats.confirmaciones,
-      label: 'Confirmaciones Jóvenes 55',
-      icon: 'fas fa-clipboard-check',
-    },
-    {
-      valor: stats.jovenesEstimados,
-      label: 'Jóvenes estimados',
-      icon: 'fas fa-users',
+      valor: stats.usuariosActivos,
+      label: 'Con acceso activo',
+      icon: 'fas fa-user-check',
     },
   ]
 
@@ -141,25 +131,13 @@ export default function AdminDashboard() {
         </p>
 
         <div className="grid gap-4 sm:grid-cols-2">
-          <Link
-            href="/admin/invitacion-jovenes55"
-            className="pressable flex items-center gap-4 rounded-card bg-canvas-sunken p-5 hover:bg-ink-quaternary/20"
-          >
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-dark text-white">
-              <i className="fas fa-clipboard-list"></i>
-            </span>
-            <span className="type-footnote font-semibold text-dark">
-              Ver confirmaciones
-            </span>
-          </Link>
-
           <button
             type="button"
             onClick={sincronizarYoutube}
             disabled={sync.estado === 'sincronizando'}
             className="pressable flex items-center gap-4 rounded-card bg-canvas-sunken p-5 text-left hover:bg-ink-quaternary/20 disabled:opacity-60"
           >
-            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-secondary text-white">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-white">
               <i
                 className={`fas fa-rotate ${sync.estado === 'sincronizando' ? 'fa-spin' : ''}`}
               ></i>
@@ -170,6 +148,18 @@ export default function AdminDashboard() {
                 : 'Sincronizar YouTube'}
             </span>
           </button>
+
+          <Link
+            href="/admin/usuarios"
+            className="pressable flex items-center gap-4 rounded-card bg-canvas-sunken p-5 hover:bg-ink-quaternary/20"
+          >
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-dark text-white">
+              <i className="fas fa-users"></i>
+            </span>
+            <span className="type-footnote font-semibold text-dark">
+              Gestionar usuarios
+            </span>
+          </Link>
         </div>
 
         {/* El resultado aparece donde ocurrio la accion, no en un dialogo aparte */}
