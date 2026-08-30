@@ -3,22 +3,27 @@
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 interface Stats {
-  sermones: number
   confirmaciones: number
   jovenesEstimados: number
 }
+
+type SyncState =
+  | { estado: 'inactivo' }
+  | { estado: 'sincronizando' }
+  | { estado: 'ok'; mensaje: string }
+  | { estado: 'error'; mensaje: string }
 
 export default function AdminDashboard() {
   const { data: session, status } = useSession()
   const router = useRouter()
   const [stats, setStats] = useState<Stats>({
-    sermones: 0,
     confirmaciones: 0,
     jovenesEstimados: 0,
   })
+  const [sync, setSync] = useState<SyncState>({ estado: 'inactivo' })
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -26,37 +31,62 @@ export default function AdminDashboard() {
     }
   }, [status, router])
 
-  useEffect(() => {
-    if (status === 'authenticated') {
-      fetchStats()
-    }
-  }, [status])
-
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     try {
-      const [sermonesRes, confirmacionesRes] = await Promise.all([
-        fetch('/api/sermones'),
-        fetch('/api/invitacion-jovenes55/confirmaciones', { cache: 'no-store' }),
-      ])
-      const sermones = await sermonesRes.json()
+      const confirmacionesRes = await fetch(
+        '/api/invitacion-jovenes55/confirmaciones',
+        { cache: 'no-store' },
+      )
       const confirmaciones = confirmacionesRes.ok
         ? await confirmacionesRes.json()
         : null
 
       setStats({
-        sermones: Array.isArray(sermones) ? sermones.length : 0,
         confirmaciones: confirmaciones?.stats?.total || 0,
         jovenesEstimados: confirmaciones?.stats?.estimatedYouth || 0,
       })
     } catch (error) {
       console.error('Error fetching stats:', error)
     }
+  }, [])
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      fetchStats()
+    }
+  }, [status, fetchStats])
+
+  const sincronizarYoutube = async () => {
+    setSync({ estado: 'sincronizando' })
+    try {
+      const res = await fetch('/api/youtube/sync', { method: 'POST' })
+      const data = await res.json()
+      if (res.ok) {
+        setSync({
+          estado: 'ok',
+          mensaje: `${data.synced} videos sincronizados.`,
+        })
+      } else {
+        setSync({ estado: 'error', mensaje: data.error || 'No se pudo sincronizar.' })
+      }
+    } catch {
+      setSync({ estado: 'error', mensaje: 'No se pudo conectar con YouTube.' })
+    }
   }
 
   if (status === 'loading') {
+    // Esqueleto con la forma del panel, no un spinner a pantalla completa
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <i className="fas fa-spinner fa-spin text-4xl text-primary"></i>
+      <div className="space-y-6">
+        <div className="h-20 animate-pulse rounded-card bg-ink-quaternary/20" />
+        <div className="grid gap-6 md:grid-cols-3">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="h-32 animate-pulse rounded-card bg-ink-quaternary/20"
+            />
+          ))}
+        </div>
       </div>
     )
   }
@@ -65,84 +95,100 @@ export default function AdminDashboard() {
     return null
   }
 
+  const tarjetas = [
+    {
+      valor: stats.confirmaciones,
+      label: 'Confirmaciones Jóvenes 55',
+      icon: 'fas fa-clipboard-check',
+    },
+    {
+      valor: stats.jovenesEstimados,
+      label: 'Jóvenes estimados',
+      icon: 'fas fa-users',
+    },
+  ]
+
   return (
     <>
-      <header className="bg-white rounded-xl shadow-sm p-6 mb-8 flex flex-wrap justify-between items-center gap-4">
-        <h2 className="text-2xl font-bold text-dark">
-          <i className="fas fa-cog text-primary mr-3"></i>
-          Panel de Control
-        </h2>
-        <span className="text-gray-600">
-          Hola, <strong>{session.user?.name || 'Admin'}</strong>
-        </span>
+      <header className="mb-8">
+        <p className="section-subtitle">Administración</p>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <h1 className="type-title-1 text-dark mb-0">Panel de control</h1>
+          <p className="type-footnote text-ink-tertiary">
+            Hola, <strong className="text-ink">{session.user?.name || 'Admin'}</strong>
+          </p>
+        </div>
       </header>
 
-      <div className="grid md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="w-12 h-12 rounded-lg bg-green-100 text-green-600 flex items-center justify-center text-xl mb-4">
-            <i className="fas fa-bible"></i>
+      <div className="mb-8 grid gap-5 sm:grid-cols-2">
+        {tarjetas.map((t) => (
+          <div key={t.label} className="card p-6">
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-primary-tint">
+              <i className={`${t.icon} text-primary`}></i>
+            </div>
+            <p className="type-display text-dark" style={{ fontSize: '2.25rem' }}>
+              {t.valor}
+            </p>
+            <p className="type-footnote text-ink-secondary mt-1">{t.label}</p>
           </div>
-          <h3 className="text-3xl font-bold text-dark">{stats.sermones}</h3>
-          <p className="text-gray-500">Sermones</p>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="w-12 h-12 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center text-xl mb-4">
-            <i className="fas fa-clipboard-check"></i>
-          </div>
-          <h3 className="text-3xl font-bold text-dark">
-            {stats.confirmaciones}
-          </h3>
-          <p className="text-gray-500">Confirmaciones Jovenes 55</p>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="w-12 h-12 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-xl mb-4">
-            <i className="fas fa-users"></i>
-          </div>
-          <h3 className="text-3xl font-bold text-dark">
-            {stats.jovenesEstimados}
-          </h3>
-          <p className="text-gray-500">Jovenes estimados</p>
-        </div>
+        ))}
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm p-8">
-        <h3 className="text-xl font-bold text-dark mb-6">Acciones Rapidas</h3>
-        <div className="grid md:grid-cols-3 gap-4">
-          <Link
-            href="/admin/sermones?new=true"
-            className="p-6 bg-secondary text-white rounded-xl text-center hover:bg-secondary-dark transition-colors"
-          >
-            <i className="fas fa-plus text-2xl mb-2"></i>
-            <p className="font-semibold">Nuevo Sermon</p>
-          </Link>
+      <section className="card p-6 md:p-8">
+        <h2 className="type-title-2 text-dark mb-1">Acciones rápidas</h2>
+        <p className="type-footnote text-ink-tertiary mb-6">
+          Lo que se usa a diario, a un toque de distancia.
+        </p>
+
+        <div className="grid gap-4 sm:grid-cols-2">
           <Link
             href="/admin/invitacion-jovenes55"
-            className="p-6 bg-primary text-white rounded-xl text-center hover:bg-primary-dark transition-colors"
+            className="pressable flex items-center gap-4 rounded-card bg-canvas-sunken p-5 hover:bg-ink-quaternary/20"
           >
-            <i className="fas fa-clipboard-list text-2xl mb-2"></i>
-            <p className="font-semibold">Ver Confirmaciones</p>
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-dark text-white">
+              <i className="fas fa-clipboard-list"></i>
+            </span>
+            <span className="type-footnote font-semibold text-dark">
+              Ver confirmaciones
+            </span>
           </Link>
+
           <button
-            onClick={async () => {
-              try {
-                const res = await fetch('/api/youtube/sync', { method: 'POST' })
-                const data = await res.json()
-                if (res.ok) {
-                  alert(`Sincronizacion exitosa: ${data.synced} videos`)
-                } else {
-                  alert('Error: ' + data.error)
-                }
-              } catch {
-                alert('Error al sincronizar')
-              }
-            }}
-            className="p-6 bg-red-500 text-white rounded-xl text-center hover:bg-red-600 transition-colors"
+            type="button"
+            onClick={sincronizarYoutube}
+            disabled={sync.estado === 'sincronizando'}
+            className="pressable flex items-center gap-4 rounded-card bg-canvas-sunken p-5 text-left hover:bg-ink-quaternary/20 disabled:opacity-60"
           >
-            <i className="fas fa-sync text-2xl mb-2"></i>
-            <p className="font-semibold">Sincronizar YouTube</p>
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-secondary text-white">
+              <i
+                className={`fas fa-rotate ${sync.estado === 'sincronizando' ? 'fa-spin' : ''}`}
+              ></i>
+            </span>
+            <span className="type-footnote font-semibold text-dark">
+              {sync.estado === 'sincronizando'
+                ? 'Sincronizando…'
+                : 'Sincronizar YouTube'}
+            </span>
           </button>
         </div>
-      </div>
+
+        {/* El resultado aparece donde ocurrio la accion, no en un dialogo aparte */}
+        {(sync.estado === 'ok' || sync.estado === 'error') && (
+          <p
+            role="status"
+            className={`mt-4 flex items-center gap-2 rounded-control px-4 py-3 type-footnote animate-rise-in ${
+              sync.estado === 'ok'
+                ? 'bg-success-tint text-success'
+                : 'bg-primary-tint text-primary-dark'
+            }`}
+          >
+            <i
+              className={`fas ${sync.estado === 'ok' ? 'fa-circle-check' : 'fa-circle-exclamation'}`}
+            ></i>
+            {sync.mensaje}
+          </p>
+        )}
+      </section>
     </>
   )
 }

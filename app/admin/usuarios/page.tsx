@@ -2,7 +2,9 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
+import Modal from '@/components/Modal'
+import ConfirmDialog from '@/components/ConfirmDialog'
 
 interface User {
   _id: string
@@ -13,21 +15,27 @@ interface User {
   createdAt: string
 }
 
+const FORM_VACIO = {
+  nombre: '',
+  email: '',
+  password: '',
+  rol: 'admin',
+  activo: true,
+}
+
 export default function AdminUsuariosPage() {
   const { status } = useSession()
   const router = useRouter()
   const [usuarios, setUsuarios] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
+  const [guardando, setGuardando] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [editingUser, setEditingUser] = useState<User | null>(null)
-  const [formData, setFormData] = useState({
-    nombre: '',
-    email: '',
-    password: '',
-    rol: 'admin',
-    activo: true,
-  })
+  const [porEliminar, setPorEliminar] = useState<User | null>(null)
+  const [eliminando, setEliminando] = useState(false)
+  const [formData, setFormData] = useState(FORM_VACIO)
   const [error, setError] = useState('')
+  const [aviso, setAviso] = useState('')
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -35,13 +43,7 @@ export default function AdminUsuariosPage() {
     }
   }, [status, router])
 
-  useEffect(() => {
-    if (status === 'authenticated') {
-      fetchUsuarios()
-    }
-  }, [status])
-
-  const fetchUsuarios = async () => {
+  const fetchUsuarios = useCallback(async () => {
     try {
       const res = await fetch('/api/users')
       const data = await res.json()
@@ -51,17 +53,24 @@ export default function AdminUsuariosPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      fetchUsuarios()
+    }
+  }, [status, fetchUsuarios])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
 
     if (!editingUser && formData.password.length < 6) {
-      setError('La contrasena debe tener al menos 6 caracteres')
+      setError('La contraseña debe tener al menos 6 caracteres.')
       return
     }
 
+    setGuardando(true)
     try {
       const url = editingUser ? `/api/users/${editingUser._id}` : '/api/users'
       const method = editingUser ? 'PUT' : 'POST'
@@ -75,45 +84,59 @@ export default function AdminUsuariosPage() {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error || 'Error al guardar')
+        setError(data.error || 'No se pudo guardar.')
         return
       }
 
-      fetchUsuarios()
+      await fetchUsuarios()
       closeModal()
     } catch (error) {
-      setError('Error de conexion')
+      setError('Error de conexión.')
+    } finally {
+      setGuardando(false)
     }
   }
 
-  const handleDelete = async (id: string) => {
-    if (confirm('Estas seguro de eliminar este usuario?')) {
-      try {
-        const res = await fetch(`/api/users/${id}`, { method: 'DELETE' })
-        const data = await res.json()
+  const confirmarEliminacion = async () => {
+    if (!porEliminar) return
+    setEliminando(true)
+    try {
+      const res = await fetch(`/api/users/${porEliminar._id}`, {
+        method: 'DELETE',
+      })
+      const data = await res.json()
 
-        if (!res.ok) {
-          alert(data.error)
-          return
-        }
-
-        fetchUsuarios()
-      } catch (error) {
-        console.error('Error:', error)
+      if (!res.ok) {
+        // El aviso queda en la pagina, junto a la lista que no cambio
+        setAviso(data.error || 'No se pudo eliminar el usuario.')
+        return
       }
+
+      setAviso('')
+      await fetchUsuarios()
+    } catch (error) {
+      setAviso('Error de conexión al eliminar.')
+    } finally {
+      setEliminando(false)
+      setPorEliminar(null)
     }
   }
 
   const toggleActivo = async (user: User) => {
+    // Cambio optimista: el interruptor responde al instante
+    setUsuarios((lista) =>
+      lista.map((u) => (u._id === user._id ? { ...u, activo: !u.activo } : u)),
+    )
     try {
       await fetch(`/api/users/${user._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ...user, activo: !user.activo }),
       })
-      fetchUsuarios()
+      await fetchUsuarios()
     } catch (error) {
       console.error('Error:', error)
+      await fetchUsuarios()
     }
   }
 
@@ -133,220 +156,292 @@ export default function AdminUsuariosPage() {
     setShowModal(false)
     setEditingUser(null)
     setError('')
-    setFormData({
-      nombre: '',
-      email: '',
-      password: '',
-      rol: 'admin',
-      activo: true,
-    })
+    setFormData(FORM_VACIO)
   }
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <i className="fas fa-spinner fa-spin text-4xl text-primary"></i>
+      <div className="space-y-6">
+        <div className="h-20 animate-pulse rounded-card bg-ink-quaternary/20" />
+        <div className="h-72 animate-pulse rounded-card bg-ink-quaternary/20" />
       </div>
     )
   }
 
   return (
     <>
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-        <div className="flex flex-wrap justify-between items-center gap-4">
-          <h2 className="text-xl sm:text-2xl font-bold text-dark">
-            <i className="fas fa-users text-primary mr-3"></i>
-            Gestion de Usuarios
-          </h2>
-          <button
-            onClick={() => setShowModal(true)}
-            className="w-full sm:w-auto px-6 py-3 bg-secondary text-white rounded-lg hover:bg-secondary-dark transition-colors"
-          >
-            <i className="fas fa-plus mr-2"></i> Agregar Usuario
-          </button>
+      <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="section-subtitle">Acceso</p>
+          <h1 className="type-title-1 text-dark mb-0">Usuarios</h1>
         </div>
-      </div>
+        <button
+          type="button"
+          onClick={() => setShowModal(true)}
+          className="btn-primary w-full sm:w-auto"
+        >
+          <i className="fas fa-plus"></i> Agregar usuario
+        </button>
+      </header>
 
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+      {aviso && (
+        <p
+          role="alert"
+          className="mb-6 flex items-center gap-2 rounded-control bg-primary-tint px-4 py-3 type-footnote text-primary-dark animate-rise-in"
+        >
+          <i className="fas fa-circle-exclamation"></i>
+          {aviso}
+        </p>
+      )}
+
+      <div className="card">
         {usuarios.length === 0 ? (
-          <div className="p-16 text-center text-gray-500">
-            <i className="fas fa-users text-6xl mb-4 text-gray-300"></i>
-            <h3 className="text-xl font-semibold mb-2">No hay usuarios</h3>
-            <p>Agrega tu primer usuario usando el boton de arriba</p>
+          <div className="p-16 text-center">
+            <i className="fas fa-users mb-4 block text-3xl text-ink-quaternary"></i>
+            <h2 className="type-title-3 text-dark">Todavía no hay usuarios</h2>
+            <p className="type-footnote text-ink-secondary mt-1">
+              Agrega el primero con el botón de arriba.
+            </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px]">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-4 text-left text-gray-600 font-semibold">
-                  Nombre
-                </th>
-                <th className="px-6 py-4 text-left text-gray-600 font-semibold">
-                  Email
-                </th>
-                <th className="px-6 py-4 text-left text-gray-600 font-semibold">
-                  Rol
-                </th>
-                <th className="px-6 py-4 text-left text-gray-600 font-semibold">
-                  Estado
-                </th>
-                <th className="px-6 py-4 text-left text-gray-600 font-semibold">
-                  Acciones
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {usuarios.map((user) => (
-                <tr key={user._id} className="border-t hover:bg-gray-50">
-                  <td className="px-6 py-4 font-medium text-dark">
-                    {user.nombre}
-                  </td>
-                  <td className="px-6 py-4 text-gray-600">{user.email}</td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={`px-3 py-1 rounded-full text-sm ${
-                        user.rol === 'admin'
-                          ? 'bg-purple-100 text-purple-600'
-                          : 'bg-blue-100 text-blue-600'
-                      }`}
+          <>
+            <div className="hidden overflow-x-auto md:block">
+              <table className="w-full min-w-[720px]">
+                <thead>
+                  <tr className="border-b border-separator bg-canvas-sunken">
+                    {['Nombre', 'Email', 'Rol', 'Estado', 'Acciones'].map((h) => (
+                      <th
+                        key={h}
+                        className="px-6 py-3.5 text-left type-caption font-semibold uppercase tracking-[0.06em] text-ink-tertiary"
+                      >
+                        {h}
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {usuarios.map((user) => (
+                    <tr
+                      key={user._id}
+                      className="border-b border-separator last:border-0 hover:bg-canvas-sunken"
                     >
-                      {user.rol}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4">
+                      <td className="px-6 py-4 type-footnote font-semibold text-dark">
+                        {user.nombre}
+                      </td>
+                      <td className="px-6 py-4 type-footnote text-ink-secondary">
+                        {user.email}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="rounded-full bg-ink-quaternary/20 px-3 py-1 type-caption font-medium text-ink-secondary">
+                          {user.rol === 'admin' ? 'Administrador' : 'Editor'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <button
+                          type="button"
+                          onClick={() => toggleActivo(user)}
+                          aria-pressed={user.activo}
+                          className={`pressable rounded-full px-3 py-1 type-caption font-medium ${
+                            user.activo
+                              ? 'bg-success-tint text-success'
+                              : 'bg-ink-quaternary/25 text-ink-tertiary'
+                          }`}
+                        >
+                          {user.activo ? 'Activo' : 'Inactivo'}
+                        </button>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={() => openEdit(user)}
+                            aria-label={`Editar ${user.nombre}`}
+                            className="pressable flex h-9 w-9 items-center justify-center rounded-full bg-ink-quaternary/20 text-ink-secondary hover:text-ink"
+                          >
+                            <i className="fas fa-pen text-xs"></i>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setPorEliminar(user)}
+                            aria-label={`Eliminar ${user.nombre}`}
+                            className="pressable flex h-9 w-9 items-center justify-center rounded-full bg-primary-tint text-primary"
+                          >
+                            <i className="fas fa-trash text-xs"></i>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <ul className="divide-y divide-separator md:hidden">
+              {usuarios.map((user) => (
+                <li key={user._id} className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="type-footnote font-semibold text-dark">
+                        {user.nombre}
+                      </p>
+                      <p className="type-caption text-ink-tertiary mt-0.5 truncate">
+                        {user.email}
+                      </p>
+                    </div>
                     <button
+                      type="button"
                       onClick={() => toggleActivo(user)}
-                      className={`px-3 py-1 rounded-full text-sm ${
+                      aria-pressed={user.activo}
+                      className={`pressable shrink-0 rounded-full px-3 py-1 type-caption font-medium ${
                         user.activo
-                          ? 'bg-green-100 text-green-600'
-                          : 'bg-red-100 text-red-600'
+                          ? 'bg-success-tint text-success'
+                          : 'bg-ink-quaternary/25 text-ink-tertiary'
                       }`}
                     >
                       {user.activo ? 'Activo' : 'Inactivo'}
                     </button>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex gap-2">
-                      <button
-                        onClick={() => openEdit(user)}
-                        className="px-3 py-2 bg-blue-100 text-blue-600 rounded hover:bg-blue-600 hover:text-white transition-colors"
-                      >
-                        <i className="fas fa-edit"></i>
-                      </button>
-                      <button
-                        onClick={() => handleDelete(user._id)}
-                        className="px-3 py-2 bg-red-100 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors"
-                      >
-                        <i className="fas fa-trash"></i>
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                  </div>
+                  <div className="mt-3 flex items-center gap-2">
+                    <span className="rounded-full bg-ink-quaternary/20 px-3 py-1 type-caption text-ink-secondary">
+                      {user.rol === 'admin' ? 'Administrador' : 'Editor'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => openEdit(user)}
+                      className="pressable rounded-full bg-ink-quaternary/20 px-4 py-1.5 type-caption font-medium text-ink"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPorEliminar(user)}
+                      className="pressable rounded-full bg-primary-tint px-4 py-1.5 type-caption font-medium text-primary"
+                    >
+                      Eliminar
+                    </button>
+                  </div>
+                </li>
               ))}
-            </tbody>
-          </table>
-          </div>
+            </ul>
+          </>
         )}
       </div>
 
-      {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl w-full max-w-lg">
-            <div className="p-6 border-b flex justify-between items-center">
-              <h3 className="text-xl font-bold text-dark">
-                <i className="fas fa-user text-primary mr-2"></i>
-                {editingUser ? 'Editar Usuario' : 'Agregar Usuario'}
-              </h3>
-              <button
-                onClick={closeModal}
-                className="text-gray-400 hover:text-gray-600 text-2xl"
-              >
-                &times;
-              </button>
-            </div>
+      <Modal
+        open={showModal}
+        onClose={closeModal}
+        title={editingUser ? 'Editar usuario' : 'Agregar usuario'}
+      >
+        {error && (
+          <p
+            role="alert"
+            className="mb-4 flex items-center gap-2 rounded-control bg-primary-tint px-4 py-3 type-footnote text-primary-dark"
+          >
+            <i className="fas fa-circle-exclamation"></i>
+            {error}
+          </p>
+        )}
 
-            {error ? (
-              <div className="mx-6 mt-4 p-4 bg-red-50 text-red-600 rounded-lg">
-                <i className="fas fa-exclamation-circle mr-2"></i>
-                {error}
-              </div>
-            ) : null}
-
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">
-                  Nombre
-                </label>
-                <input
-                  type="text"
-                  value={formData.nombre}
-                  onChange={(e) =>
-                    setFormData({ ...formData, nombre: e.target.value })
-                  }
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">
-                  Contrasena{' '}
-                  {editingUser ? (
-                    <span className="text-gray-400 text-sm">
-                      (dejar vacio para no cambiar)
-                    </span>
-                  ) : null}
-                </label>
-                <input
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none"
-                  placeholder={editingUser ? '********' : 'Minimo 6 caracteres'}
-                  required={!editingUser}
-                />
-              </div>
-              <div>
-                <label className="block text-gray-700 font-medium mb-2">
-                  Rol
-                </label>
-                <select
-                  value={formData.rol}
-                  onChange={(e) =>
-                    setFormData({ ...formData, rol: e.target.value })
-                  }
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none"
-                >
-                  <option value="admin">Administrador</option>
-                  <option value="editor">Editor</option>
-                </select>
-              </div>
-              <button
-                type="submit"
-                className="w-full py-4 bg-primary text-white rounded-lg font-semibold hover:bg-primary-dark transition-colors"
-              >
-                <i className="fas fa-save mr-2"></i> Guardar Usuario
-              </button>
-            </form>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="field-label" htmlFor="nombre">
+              Nombre
+            </label>
+            <input
+              id="nombre"
+              type="text"
+              value={formData.nombre}
+              onChange={(e) =>
+                setFormData({ ...formData, nombre: e.target.value })
+              }
+              className="field"
+              required
+            />
           </div>
-        </div>
-      )}
+
+          <div>
+            <label className="field-label" htmlFor="email">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+              className="field"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="field-label" htmlFor="password">
+              Contraseña{' '}
+              {editingUser && (
+                <span className="font-normal text-ink-tertiary">
+                  (déjala vacía para no cambiarla)
+                </span>
+              )}
+            </label>
+            <input
+              id="password"
+              type="password"
+              autoComplete="new-password"
+              value={formData.password}
+              onChange={(e) =>
+                setFormData({ ...formData, password: e.target.value })
+              }
+              className="field"
+              placeholder={editingUser ? '••••••••' : 'Mínimo 6 caracteres'}
+              required={!editingUser}
+            />
+          </div>
+
+          <div>
+            <label className="field-label" htmlFor="rol">
+              Rol
+            </label>
+            <select
+              id="rol"
+              value={formData.rol}
+              onChange={(e) => setFormData({ ...formData, rol: e.target.value })}
+              className="field"
+            >
+              <option value="admin">Administrador</option>
+              <option value="editor">Editor</option>
+            </select>
+          </div>
+
+          <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
+            <button type="button" onClick={closeModal} className="btn-ghost">
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              disabled={guardando}
+              className="btn-primary disabled:opacity-60"
+            >
+              {guardando ? (
+                <>
+                  <i className="fas fa-spinner fa-spin"></i> Guardando…
+                </>
+              ) : (
+                'Guardar usuario'
+              )}
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      <ConfirmDialog
+        open={porEliminar !== null}
+        title="Eliminar usuario"
+        message={`Se eliminará la cuenta de ${porEliminar?.nombre ?? ''} y perderá el acceso al panel. Esta acción no se puede deshacer.`}
+        loading={eliminando}
+        onConfirm={confirmarEliminacion}
+        onCancel={() => setPorEliminar(null)}
+      />
     </>
   )
 }

@@ -1,13 +1,42 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useSheet } from "@/lib/useSheet";
+import WhatsAppFab from "@/components/WhatsAppFab";
+import { etiquetaProximoServicio } from "@/lib/horarios";
+
+const navLinks = [
+  { href: "/", label: "Inicio" },
+  { href: "/nosotros", label: "Nosotros" },
+  { href: "/en-vivo", label: "Transmisiones", isLive: true },
+  { href: "/redes", label: "Redes" },
+  { href: "/contacto", label: "Contacto" },
+];
+
+const social = [
+  { href: "https://www.facebook.com/Jirehchurch0498", icon: "fab fa-facebook-f", label: "Facebook" },
+  { href: "https://www.youtube.com/@TemploJirehTV", icon: "fab fa-youtube", label: "YouTube" },
+  { href: "https://www.instagram.com/templo_jireh/", icon: "fab fa-instagram", label: "Instagram" },
+];
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLive, setIsLive] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [proximo, setProximo] = useState<{ nombre: string; cuando: string } | null>(
+    null,
+  );
   const pathname = usePathname();
+  const headerRef = useRef<HTMLElement | null>(null);
+
+  const { mounted, sheetRef, scrimRef, dragHandlers } = useSheet({
+    open: isMenuOpen,
+    onClose: () => setIsMenuOpen(false),
+    from: "top",
+  });
 
   useEffect(() => {
     const checkLiveStatus = async () => {
@@ -21,110 +50,241 @@ export default function Header() {
     };
 
     checkLiveStatus();
-    const interval = setInterval(checkLiveStatus, 60000); // Check every minute
+    const interval = setInterval(checkLiveStatus, 60000);
     return () => clearInterval(interval);
   }, []);
 
-  const navLinks = [
-    { href: "/", label: "Inicio" },
-    { href: "/nosotros", label: "Nosotros" },
-    { href: "/sermones", label: "Sermones" },
-    { href: "/en-vivo", label: "Transmisiones", isLive: true },
-    { href: "/redes", label: "Redes" },
-    { href: "/contacto", label: "Contacto" },
-  ];
+  // La hora local de quien visita solo existe en el navegador: se calcula
+  // despues del montaje para no desincronizar el HTML del servidor.
+  useEffect(() => {
+    const etiqueta = etiquetaProximoServicio();
+    if (etiqueta) setProximo({ nombre: etiqueta.nombre, cuando: etiqueta.cuando });
+  }, []);
+
+  // El borde de scroll aparece solo cuando el contenido pasa bajo el chrome
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // Cerrar al navegar: la hoja sale por el mismo borde por el que entro
+  useEffect(() => {
+    setIsMenuOpen(false);
+  }, [pathname]);
 
   return (
     <>
-      {/* Header Top */}
-      <div className="bg-dark text-white py-2 text-sm hidden md:block">
+      {/* Cuando hay transmision, es la accion mas valiosa del sitio:
+          ocupa una barra propia en lugar de un punto de 8 px */}
+      {isLive && (
+        <Link
+          href="/en-vivo"
+          className="pressable block bg-primary text-white animate-rise-in"
+        >
+          <div className="container mx-auto flex items-center justify-center gap-2.5 px-4 py-2.5 type-footnote font-semibold">
+            <span className="relative flex h-2.5 w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-white"></span>
+            </span>
+            Estamos transmitiendo en vivo
+            <span className="hidden sm:inline opacity-80">· Entrar ahora</span>
+            <i className="fas fa-arrow-right text-[11px]"></i>
+          </div>
+        </Link>
+      )}
+
+      {/* Franja de contacto: informacion de estado, no navegacion */}
+      <div className="material-dark vibrant-on-dark py-2 type-caption hidden md:block">
         <div className="container mx-auto px-4 flex justify-between items-center">
           <div className="flex gap-6">
             <span>
-              <i className="fas fa-map-marker-alt text-primary mr-2"></i>
+              <i className="fas fa-map-marker-alt text-primary-light mr-2"></i>
               Presidente Alessandri #0498, La Granja
             </span>
-            <span>
-              <i className="fas fa-phone text-primary mr-2"></i>
+            <a href="tel:+56957268552" className="pressable inline-block hover:text-primary-light">
+              <i className="fas fa-phone text-primary-light mr-2"></i>
               +56 9 5726 8552
-            </span>
-            <span>
-              <i className="fas fa-envelope text-primary mr-2"></i>
-              jirehchurch52@gmail.com
-            </span>
+            </a>
+            {proximo && (
+              <span>
+                <i className="fas fa-calendar-day text-primary-light mr-2"></i>
+                Próximo: {proximo.nombre} · {proximo.cuando}
+              </span>
+            )}
           </div>
-          <div className="flex gap-4">
-            <a
-              href="https://www.facebook.com/Jirehchurch0498"
-              target="_blank"
-              className="hover:text-primary transition-colors"
-            >
-              <i className="fab fa-facebook-f"></i>
-            </a>
-            <a
-              href="https://www.youtube.com/@TemploJirehTV"
-              target="_blank"
-              className="hover:text-primary transition-colors"
-            >
-              <i className="fab fa-youtube"></i>
-            </a>
-            <a
-              href="https://www.instagram.com/templo_jireh/"
-              target="_blank"
-              className="hover:text-primary transition-colors"
-            >
-              <i className="fab fa-instagram"></i>
-            </a>
+          <div className="flex gap-1">
+            {social.map((item) => (
+              <a
+                key={item.href}
+                href={item.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={item.label}
+                className="pressable w-8 h-8 rounded-full flex items-center justify-center hover:bg-white/15"
+              >
+                <i className={item.icon}></i>
+              </a>
+            ))}
           </div>
         </div>
       </div>
 
-      {/* Header Main */}
-      <header className="bg-white shadow-md sticky top-0 z-50">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <Link href="/" className="text-2xl font-bold text-dark">
-            Templo <span className="text-primary">Jireh</span>
+      {/* Chrome flotante: el contenido pasa por debajo */}
+      <header
+        ref={headerRef}
+        data-scrolled={scrolled}
+        className="material material-edge-bottom scroll-edge sticky top-0 z-50 border-b border-separator"
+      >
+        <div className="container mx-auto px-4 h-[4.5rem] flex justify-between items-center gap-4">
+          {/* El isotipo ancla la identidad; el nombre queda como texto real */}
+          <Link href="/" className="pressable flex shrink-0 items-center gap-3">
+            <Image
+              src="/logo.png"
+              alt=""
+              width={40}
+              height={40}
+              priority
+              className="h-10 w-auto"
+            />
+            <span className="text-2xl font-bold tracking-[-0.02em] text-dark">
+              Templo <span className="text-primary">Jireh</span>
+            </span>
           </Link>
 
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden text-2xl text-dark"
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-          >
-            <i className={`fas ${isMenuOpen ? "fa-times" : "fa-bars"}`}></i>
-          </button>
-
-          {/* Navigation */}
-          <nav
-            className={`${isMenuOpen ? "block" : "hidden"} md:block absolute md:relative top-full left-0 right-0 bg-white md:bg-transparent shadow-md md:shadow-none`}
-          >
-            <ul className="flex flex-col md:flex-row md:gap-8 p-4 md:p-0">
-              {navLinks.map((link: any) => (
-                <li
-                  key={link.href}
-                  className="border-b md:border-none border-gray-100"
+          {/* Navegacion de escritorio: el indicador activo es una pastilla,
+              no un cambio de color suelto. El ultimo elemento no es un
+              enlace mas: es la accion que queremos que ocurra. */}
+          <nav className="hidden md:block">
+            <ul className="flex items-center gap-1">
+              {navLinks.map((link) => {
+                const active = pathname === link.href;
+                return (
+                  <li key={link.href}>
+                    <Link
+                      href={link.href}
+                      aria-current={active ? "page" : undefined}
+                      className={`pressable relative flex items-center gap-1.5 rounded-full px-3.5 py-2 type-footnote font-medium ${
+                        active
+                          ? "bg-primary-tint text-primary"
+                          : "text-ink-secondary hover:bg-ink-quaternary/40 hover:text-ink"
+                      }`}
+                    >
+                      {link.label}
+                      {link.isLive && isLive && (
+                        <span className="relative flex h-2 w-2" aria-label="En vivo ahora">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
+                        </span>
+                      )}
+                    </Link>
+                  </li>
+                );
+              })}
+              <li className="ml-2">
+                <Link
+                  href="/contacto"
+                  className="pressable inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 type-footnote font-semibold text-white shadow-raised hover:bg-primary-dark"
                 >
-                  <Link
-                    href={link.href}
-                    className={`block py-3 md:py-0 font-medium transition-colors hover:text-primary ${
-                      pathname === link.href ? "text-primary" : "text-dark"
-                    } ${link.isLive ? "flex items-center gap-1.5" : ""}`}
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    {link.label}
-                    {link.isLive && isLive && (
-                      <span className="relative flex h-2.5 w-2.5">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600"></span>
-                      </span>
-                    )}
-                  </Link>
-                </li>
-              ))}
+                  Planifica tu visita
+                </Link>
+              </li>
             </ul>
           </nav>
+
+          {/* Boton de menu: responde en pointer-down */}
+          <button
+            type="button"
+            className="pressable md:hidden w-10 h-10 rounded-full flex items-center justify-center text-lg text-dark bg-ink-quaternary/30"
+            aria-expanded={isMenuOpen}
+            aria-controls="menu-movil"
+            aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
+            onPointerDown={() => setIsMenuOpen((v) => !v)}
+          >
+            <i className={`fas ${isMenuOpen ? "fa-xmark" : "fa-bars"}`}></i>
+          </button>
         </div>
       </header>
+
+      {/* Hoja de navegacion movil: arrastrable, interrumpible,
+          entra y sale por el borde superior */}
+      {mounted && (
+        <div className="md:hidden fixed inset-0 z-40 pointer-events-none">
+          <div
+            ref={scrimRef}
+            className="scrim absolute inset-0 pointer-events-auto"
+            style={{ opacity: 0 }}
+            onPointerDown={() => setIsMenuOpen(false)}
+            aria-hidden="true"
+          />
+          <div
+            ref={sheetRef}
+            id="menu-movil"
+            className="material-thick absolute left-0 right-0 top-[4.5rem] pointer-events-auto rounded-b-sheet shadow-floating pb-3"
+            style={{ touchAction: "none" }}
+            {...dragHandlers}
+          >
+            <nav className="px-3 pt-3">
+              <ul className="flex flex-col">
+                {navLinks.map((link) => {
+                  const active = pathname === link.href;
+                  return (
+                    <li key={link.href}>
+                      <Link
+                        href={link.href}
+                        aria-current={active ? "page" : undefined}
+                        className={`pressable flex items-center gap-2 rounded-control px-4 py-3 font-medium ${
+                          active ? "bg-primary-tint text-primary" : "vibrant-primary"
+                        }`}
+                        onClick={() => setIsMenuOpen(false)}
+                      >
+                        {link.label}
+                        {link.isLive && isLive && (
+                          <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-red-600"></span>
+                          </span>
+                        )}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+
+            <div className="px-3 pt-2">
+              <Link
+                href="/contacto"
+                onClick={() => setIsMenuOpen(false)}
+                className="btn-primary w-full"
+              >
+                Planifica tu visita
+              </Link>
+            </div>
+
+            <div className="flex justify-center gap-2 px-4 pt-3 pb-2">
+              {social.map((item) => (
+                <a
+                  key={item.href}
+                  href={item.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={item.label}
+                  className="pressable w-10 h-10 rounded-full bg-ink-quaternary/30 flex items-center justify-center vibrant-primary"
+                >
+                  <i className={item.icon}></i>
+                </a>
+              ))}
+            </div>
+
+            {/* Asa: indica que la hoja se puede agarrar y devolver */}
+            <div className="sheet-grabber mt-1" />
+          </div>
+        </div>
+      )}
+
+      <WhatsAppFab />
     </>
   );
 }

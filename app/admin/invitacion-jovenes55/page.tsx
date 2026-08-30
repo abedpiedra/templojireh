@@ -2,7 +2,8 @@
 
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import ConfirmDialog from '@/components/ConfirmDialog'
 
 type AttendanceValue = 'yes' | 'no'
 
@@ -31,6 +32,12 @@ const emptyStats: ConfirmationStats = {
   latestAt: null,
 }
 
+const filtrosAsistencia: { key: 'all' | AttendanceValue; label: string }[] = [
+  { key: 'all', label: 'Todas' },
+  { key: 'yes', label: 'Sí asisten' },
+  { key: 'no', label: 'No asisten' },
+]
+
 function formatDate(value?: string | null) {
   if (!value) {
     return '--'
@@ -57,12 +64,14 @@ export default function AdminInvitacionJovenes55Page() {
   const [confirmations, setConfirmations] = useState<Confirmation[]>([])
   const [stats, setStats] = useState<ConfirmationStats>(emptyStats)
   const [loading, setLoading] = useState(true)
+  const [actualizando, setActualizando] = useState(false)
   const [error, setError] = useState('')
   const [search, setSearch] = useState('')
   const [attendanceFilter, setAttendanceFilter] = useState<
     'all' | AttendanceValue
   >('all')
-  const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [porEliminar, setPorEliminar] = useState<Confirmation | null>(null)
+  const [eliminando, setEliminando] = useState(false)
 
   useEffect(() => {
     if (status === 'unauthenticated') {
@@ -70,14 +79,8 @@ export default function AdminInvitacionJovenes55Page() {
     }
   }, [status, router])
 
-  useEffect(() => {
-    if (status === 'authenticated') {
-      fetchConfirmations()
-    }
-  }, [status])
-
-  const fetchConfirmations = async () => {
-    setLoading(true)
+  const fetchConfirmations = useCallback(async () => {
+    setActualizando(true)
     setError('')
 
     try {
@@ -87,18 +90,27 @@ export default function AdminInvitacionJovenes55Page() {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error || 'Error al cargar confirmaciones')
+        setError(data.error || 'No se pudieron cargar las confirmaciones.')
         return
       }
 
-      setConfirmations(Array.isArray(data.confirmations) ? data.confirmations : [])
+      setConfirmations(
+        Array.isArray(data.confirmations) ? data.confirmations : [],
+      )
       setStats(data.stats || emptyStats)
     } catch (error) {
-      setError('Error de conexion')
+      setError('Error de conexión.')
     } finally {
       setLoading(false)
+      setActualizando(false)
     }
-  }
+  }, [])
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      fetchConfirmations()
+    }
+  }, [status, fetchConfirmations])
 
   const filteredConfirmations = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase()
@@ -115,37 +127,30 @@ export default function AdminInvitacionJovenes55Page() {
     })
   }, [confirmations, search, attendanceFilter])
 
-  const handleDelete = async (confirmation: Confirmation) => {
-    const warning =
-      `Vas a eliminar la confirmacion de "${confirmation.churchName}".\n\n` +
-      'Esta accion es permanente y no se puede deshacer. ' +
-      'El registro se descontara de las estadisticas.\n\n' +
-      'Estas seguro de que deseas continuar?'
+  const confirmarEliminacion = async () => {
+    if (!porEliminar) return
 
-    if (!confirm(warning)) {
-      return
-    }
-
-    setDeletingId(confirmation._id)
+    setEliminando(true)
     setError('')
 
     try {
       const res = await fetch(
-        `/api/invitacion-jovenes55/confirmaciones/${confirmation._id}`,
+        `/api/invitacion-jovenes55/confirmaciones/${porEliminar._id}`,
         { method: 'DELETE' },
       )
       const data = await res.json().catch(() => null)
 
       if (!res.ok) {
-        setError(data?.error || 'Error al eliminar la confirmacion')
+        setError(data?.error || 'No se pudo eliminar la confirmación.')
         return
       }
 
       await fetchConfirmations()
     } catch (error) {
-      setError('Error de conexion')
+      setError('Error de conexión.')
     } finally {
-      setDeletingId(null)
+      setEliminando(false)
+      setPorEliminar(null)
     }
   }
 
@@ -161,7 +166,7 @@ export default function AdminInvitacionJovenes55Page() {
     ]
 
     const csv = rows.map((row) => row.map(escapeCsv).join(',')).join('\n')
-    const blob = new Blob([`\uFEFF${csv}`], {
+    const blob = new Blob([`﻿${csv}`], {
       type: 'text/csv;charset=utf-8;',
     })
     const url = URL.createObjectURL(blob)
@@ -187,8 +192,8 @@ export default function AdminInvitacionJovenes55Page() {
     const pageHeight = doc.internal.pageSize.getHeight()
     const marginX = 14
 
-    // Encabezado de marca
-    doc.setFillColor(26, 26, 46) // dark
+    // Encabezado con los colores del isotipo
+    doc.setFillColor(16, 16, 18) // negro de marca
     doc.rect(0, 0, pageWidth, 26, 'F')
     doc.setTextColor(255, 255, 255)
     doc.setFont('helvetica', 'bold')
@@ -196,7 +201,7 @@ export default function AdminInvitacionJovenes55Page() {
     doc.text('Templo Jireh', marginX, 13)
     doc.setFont('helvetica', 'normal')
     doc.setFontSize(11)
-    doc.setTextColor(209, 79, 66) // primary
+    doc.setTextColor(228, 19, 47) // carmesi de marca
     doc.text('Confirmaciones Jovenes 55', marginX, 20)
 
     doc.setTextColor(200, 200, 200)
@@ -208,7 +213,6 @@ export default function AdminInvitacionJovenes55Page() {
       { align: 'right' },
     )
 
-    // Resumen
     doc.setTextColor(60, 60, 60)
     doc.setFontSize(10)
     doc.text(
@@ -217,7 +221,6 @@ export default function AdminInvitacionJovenes55Page() {
       36,
     )
 
-    // Tabla tipo lista
     autoTable(doc, {
       startY: 42,
       head: [['Fecha', 'Iglesia', 'Asiste', 'Jovenes']],
@@ -229,11 +232,11 @@ export default function AdminInvitacionJovenes55Page() {
       ]),
       styles: { fontSize: 9, cellPadding: 3, valign: 'middle' },
       headStyles: {
-        fillColor: [209, 79, 66],
+        fillColor: [200, 15, 44],
         textColor: 255,
         fontStyle: 'bold',
       },
-      alternateRowStyles: { fillColor: [247, 247, 247] },
+      alternateRowStyles: { fillColor: [245, 245, 247] },
       columnStyles: {
         2: { halign: 'center', cellWidth: 22 },
         3: { halign: 'center', cellWidth: 24 },
@@ -241,7 +244,6 @@ export default function AdminInvitacionJovenes55Page() {
       margin: { left: marginX, right: marginX },
     })
 
-    // Pie de pagina con numeracion
     const pageCount = doc.getNumberOfPages()
     for (let page = 1; page <= pageCount; page += 1) {
       doc.setPage(page)
@@ -262,194 +264,256 @@ export default function AdminInvitacionJovenes55Page() {
 
   if (status === 'loading' || loading) {
     return (
-      <div className="min-h-[60vh] flex items-center justify-center">
-        <i className="fas fa-spinner fa-spin text-4xl text-primary"></i>
+      <div className="space-y-6">
+        <div className="h-20 animate-pulse rounded-card bg-ink-quaternary/20" />
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+          {[0, 1, 2, 3].map((i) => (
+            <div
+              key={i}
+              className="h-32 animate-pulse rounded-card bg-ink-quaternary/20"
+            />
+          ))}
+        </div>
+        <div className="h-72 animate-pulse rounded-card bg-ink-quaternary/20" />
       </div>
     )
   }
 
+  const tarjetas = [
+    { valor: stats.total, label: 'Respuestas', icon: 'fas fa-church' },
+    { valor: stats.attendingChurches, label: 'Sí asisten', icon: 'fas fa-check' },
+    { valor: stats.notAttendingChurches, label: 'No asisten', icon: 'fas fa-xmark' },
+    { valor: stats.estimatedYouth, label: 'Jóvenes estimados', icon: 'fas fa-users' },
+  ]
+
   return (
     <>
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-        <div className="flex flex-wrap justify-between items-center gap-4">
+      <header className="mb-8">
+        <p className="section-subtitle">Aniversario 55</p>
+        <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-dark">
-              <i className="fas fa-clipboard-check text-primary mr-3"></i>
-              Confirmaciones Jovenes 55
-            </h2>
-            <p className="text-gray-500 mt-1">
-              Ultima respuesta: {formatDate(stats.latestAt)}
+            <h1 className="type-title-1 text-dark mb-0">Confirmaciones</h1>
+            <p className="type-footnote text-ink-tertiary mt-1">
+              Última respuesta: {formatDate(stats.latestAt)}
             </p>
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2">
             <button
+              type="button"
               onClick={fetchConfirmations}
-              className="px-5 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              disabled={actualizando}
+              className="btn-ghost disabled:opacity-60"
             >
-              <i className="fas fa-sync mr-2"></i> Actualizar
+              <i className={`fas fa-rotate ${actualizando ? 'fa-spin' : ''}`}></i>
+              Actualizar
             </button>
             <button
+              type="button"
               onClick={exportCsv}
               disabled={filteredConfirmations.length === 0}
-              className="px-5 py-3 bg-secondary text-white rounded-lg hover:bg-secondary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-ghost disabled:opacity-40"
             >
-              <i className="fas fa-file-csv mr-2"></i> Exportar CSV
+              <i className="fas fa-file-csv"></i> CSV
             </button>
             <button
+              type="button"
               onClick={exportPdf}
               disabled={filteredConfirmations.length === 0}
-              className="px-5 py-3 bg-primary text-white rounded-lg hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="btn-primary disabled:opacity-40"
             >
-              <i className="fas fa-file-pdf mr-2"></i> Exportar PDF
+              <i className="fas fa-file-pdf"></i> PDF
             </button>
           </div>
         </div>
-      </div>
+      </header>
 
-      {error ? (
-        <div className="bg-red-50 text-red-600 rounded-xl p-4 mb-8">
-          <i className="fas fa-exclamation-circle mr-2"></i>
+      {error && (
+        <p
+          role="alert"
+          className="mb-8 flex items-center gap-2 rounded-control bg-primary-tint px-4 py-3 type-footnote text-primary-dark animate-rise-in"
+        >
+          <i className="fas fa-circle-exclamation"></i>
           {error}
-        </div>
-      ) : null}
+        </p>
+      )}
 
-      <div className="grid md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="w-12 h-12 rounded-lg bg-purple-100 text-purple-600 flex items-center justify-center text-xl mb-4">
-            <i className="fas fa-church"></i>
+      <div className="mb-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        {tarjetas.map((t) => (
+          <div key={t.label} className="card p-6">
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-primary-tint">
+              <i className={`${t.icon} text-primary`}></i>
+            </div>
+            <p className="type-display text-dark" style={{ fontSize: '2.25rem' }}>
+              {t.valor}
+            </p>
+            <p className="type-footnote text-ink-secondary mt-1">{t.label}</p>
           </div>
-          <h3 className="text-3xl font-bold text-dark">{stats.total}</h3>
-          <p className="text-gray-500">Respuestas</p>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="w-12 h-12 rounded-lg bg-green-100 text-green-600 flex items-center justify-center text-xl mb-4">
-            <i className="fas fa-check"></i>
-          </div>
-          <h3 className="text-3xl font-bold text-dark">
-            {stats.attendingChurches}
-          </h3>
-          <p className="text-gray-500">Si asisten</p>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="w-12 h-12 rounded-lg bg-red-100 text-red-600 flex items-center justify-center text-xl mb-4">
-            <i className="fas fa-times"></i>
-          </div>
-          <h3 className="text-3xl font-bold text-dark">
-            {stats.notAttendingChurches}
-          </h3>
-          <p className="text-gray-500">No asisten</p>
-        </div>
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="w-12 h-12 rounded-lg bg-blue-100 text-blue-600 flex items-center justify-center text-xl mb-4">
-            <i className="fas fa-users"></i>
-          </div>
-          <h3 className="text-3xl font-bold text-dark">
-            {stats.estimatedYouth}
-          </h3>
-          <p className="text-gray-500">Jovenes estimados</p>
-        </div>
+        ))}
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-        <div className="grid md:grid-cols-[1fr_auto] gap-4">
+      {/* Los controles viven junto a la lista que filtran */}
+      <div className="card mb-6 p-4 md:p-5">
+        <div className="grid gap-3 md:grid-cols-[1fr_auto] md:items-center">
           <div className="relative">
-            <i className="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+            <i className="fas fa-magnifying-glass pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-ink-tertiary"></i>
             <input
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none"
-              placeholder="Buscar iglesia..."
+              className="field pl-11"
+              placeholder="Buscar iglesia…"
+              aria-label="Buscar iglesia"
             />
           </div>
-          <select
-            value={attendanceFilter}
-            onChange={(event) =>
-              setAttendanceFilter(event.target.value as 'all' | AttendanceValue)
-            }
-            className="px-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none"
+          <div
+            role="tablist"
+            aria-label="Filtrar por asistencia"
+            className="flex gap-2"
           >
-            <option value="all">Todas</option>
-            <option value="yes">Si asisten</option>
-            <option value="no">No asisten</option>
-          </select>
+            {filtrosAsistencia.map((f) => {
+              const activo = attendanceFilter === f.key
+              return (
+                <button
+                  key={f.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={activo}
+                  onPointerDown={() => setAttendanceFilter(f.key)}
+                  onClick={() => setAttendanceFilter(f.key)}
+                  className={`pressable rounded-full px-4 py-2 type-footnote font-medium ${
+                    activo
+                      ? 'bg-dark text-white shadow-raised'
+                      : 'bg-canvas-sunken text-ink-secondary hover:text-ink'
+                  }`}
+                >
+                  {f.label}
+                </button>
+              )
+            })}
+          </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+      <div className="card">
         {filteredConfirmations.length === 0 ? (
-          <div className="p-16 text-center text-gray-500">
-            <i className="fas fa-inbox text-6xl mb-4 text-gray-300"></i>
-            <h3 className="text-xl font-semibold mb-2">No hay confirmaciones</h3>
-            <p>Las respuestas apareceran en esta tabla.</p>
+          <div className="p-16 text-center">
+            <i className="fas fa-inbox mb-4 block text-3xl text-ink-quaternary"></i>
+            <h2 className="type-title-3 text-dark">
+              {confirmations.length === 0
+                ? 'Todavía no hay confirmaciones'
+                : 'Sin resultados para este filtro'}
+            </h2>
+            <p className="type-footnote text-ink-secondary mt-1">
+              {confirmations.length === 0
+                ? 'Las respuestas aparecerán aquí apenas lleguen.'
+                : 'Prueba con otro texto o quita el filtro.'}
+            </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px]">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-4 text-left text-gray-600 font-semibold">
-                    Fecha
-                  </th>
-                  <th className="px-6 py-4 text-left text-gray-600 font-semibold">
-                    Iglesia
-                  </th>
-                  <th className="px-6 py-4 text-left text-gray-600 font-semibold">
-                    Asiste
-                  </th>
-                  <th className="px-6 py-4 text-left text-gray-600 font-semibold">
-                    Jovenes
-                  </th>
-                  <th className="px-6 py-4 text-right text-gray-600 font-semibold">
-                    Acciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredConfirmations.map((confirmation) => (
-                  <tr key={confirmation._id} className="border-t hover:bg-gray-50">
-                    <td className="px-6 py-4 text-gray-600">
-                      {formatDate(confirmation.createdAt)}
-                    </td>
-                    <td className="px-6 py-4 font-medium text-dark">
-                      {confirmation.churchName}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-sm font-medium ${
-                          confirmation.willAttend === 'yes'
-                            ? 'bg-green-100 text-green-600'
-                            : 'bg-red-100 text-red-600'
+          <>
+            <div className="hidden overflow-x-auto md:block">
+              <table className="w-full min-w-[720px]">
+                <thead>
+                  <tr className="border-b border-separator bg-canvas-sunken">
+                    {['Fecha', 'Iglesia', 'Asiste', 'Jóvenes', ''].map((h, i) => (
+                      <th
+                        key={h || i}
+                        className={`px-6 py-3.5 type-caption font-semibold uppercase tracking-[0.06em] text-ink-tertiary ${
+                          i === 4 ? 'text-right' : 'text-left'
                         }`}
                       >
-                        {confirmation.willAttend === 'yes' ? 'Si' : 'No'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-gray-700">
-                      {confirmation.estimatedYouth}
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <button
-                        onClick={() => handleDelete(confirmation)}
-                        disabled={deletingId === confirmation._id}
-                        title="Eliminar confirmacion"
-                        aria-label={`Eliminar confirmacion de ${confirmation.churchName}`}
-                        className="px-3 py-2 bg-red-100 text-red-600 rounded hover:bg-red-600 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {deletingId === confirmation._id ? (
-                          <i className="fas fa-spinner fa-spin"></i>
-                        ) : (
-                          <i className="fas fa-trash"></i>
-                        )}
-                      </button>
-                    </td>
+                        {h}
+                      </th>
+                    ))}
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {filteredConfirmations.map((confirmation) => (
+                    <tr
+                      key={confirmation._id}
+                      className="border-b border-separator last:border-0 hover:bg-canvas-sunken"
+                    >
+                      <td className="px-6 py-4 type-footnote text-ink-secondary">
+                        {formatDate(confirmation.createdAt)}
+                      </td>
+                      <td className="px-6 py-4 type-footnote font-semibold text-dark">
+                        {confirmation.churchName}
+                      </td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={`rounded-full px-3 py-1 type-caption font-medium ${
+                            confirmation.willAttend === 'yes'
+                              ? 'bg-success-tint text-success'
+                              : 'bg-ink-quaternary/25 text-ink-tertiary'
+                          }`}
+                        >
+                          {confirmation.willAttend === 'yes' ? 'Sí' : 'No'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 type-footnote text-ink-secondary">
+                        {confirmation.estimatedYouth}
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <button
+                          type="button"
+                          onClick={() => setPorEliminar(confirmation)}
+                          aria-label={`Eliminar confirmación de ${confirmation.churchName}`}
+                          className="pressable inline-flex h-9 w-9 items-center justify-center rounded-full bg-primary-tint text-primary"
+                        >
+                          <i className="fas fa-trash text-xs"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <ul className="divide-y divide-separator md:hidden">
+              {filteredConfirmations.map((confirmation) => (
+                <li key={confirmation._id} className="p-4">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="type-footnote font-semibold text-dark">
+                        {confirmation.churchName}
+                      </p>
+                      <p className="type-caption text-ink-tertiary mt-0.5">
+                        {formatDate(confirmation.createdAt)} ·{' '}
+                        {confirmation.estimatedYouth} jóvenes
+                      </p>
+                    </div>
+                    <span
+                      className={`shrink-0 rounded-full px-3 py-1 type-caption font-medium ${
+                        confirmation.willAttend === 'yes'
+                          ? 'bg-success-tint text-success'
+                          : 'bg-ink-quaternary/25 text-ink-tertiary'
+                      }`}
+                    >
+                      {confirmation.willAttend === 'yes' ? 'Sí' : 'No'}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setPorEliminar(confirmation)}
+                    className="pressable mt-3 rounded-full bg-primary-tint px-4 py-1.5 type-caption font-medium text-primary"
+                  >
+                    Eliminar
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </>
         )}
       </div>
+
+      <ConfirmDialog
+        open={porEliminar !== null}
+        title="Eliminar confirmación"
+        message={`Se eliminará la confirmación de “${porEliminar?.churchName ?? ''}” y se descontará de las estadísticas. Esta acción no se puede deshacer.`}
+        loading={eliminando}
+        onConfirm={confirmarEliminacion}
+        onCancel={() => setPorEliminar(null)}
+      />
     </>
   )
 }

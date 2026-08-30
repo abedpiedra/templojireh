@@ -1086,3 +1086,119 @@
     gap: 0.35rem;
   }
 }
+
+/* ============================================================
+   CAPA DE COMPORTAMIENTO
+   Se conserva la identidad visual del aniversario; lo que se
+   suma es como responde al tacto y a las preferencias del sistema.
+   ============================================================ */
+
+.invitationPage {
+  /* Mismas curvas que el resto del sitio: resorte critico por defecto */
+  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+  --press: 100ms;
+  --response: 400ms;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.invitationPage button,
+.invitationPage a,
+.invitationPage input,
+.invitationPage label {
+  touch-action: manipulation;
+}
+
+/* El feedback ocurre al presionar, no al soltar */
+.invitationPage .button,
+.invitationPage .map-link,
+.invitationPage .calendar-link,
+.invitationPage .spotify-cta,
+.invitationPage .radio-option {
+  transition:
+    transform var(--press) ease-out,
+    background-color var(--response) var(--ease-spring),
+    border-color var(--response) var(--ease-spring),
+    color var(--response) var(--ease-spring),
+    box-shadow var(--response) var(--ease-spring);
+  will-change: transform;
+}
+
+.invitationPage .button:active,
+.invitationPage .map-link:active,
+.invitationPage .calendar-link:active,
+.invitationPage .spotify-cta:active,
+.invitationPage .radio-option:active {
+  transform: scale(0.97);
+}
+
+/* Superficies grandes se comprimen menos para que el gesto se lea igual */
+.invitationPage .anniversary-card {
+  transition:
+    transform var(--response) var(--ease-spring),
+    box-shadow var(--response) var(--ease-spring),
+    border-color var(--response) var(--ease-spring);
+}
+
+.invitationPage .anniversary-card:active {
+  transform: scale(0.99);
+  transition: transform var(--press) ease-out;
+}
+
+/* Los digitos de la cuenta atras no deben bailar al cambiar de ancho */
+.invitationPage .countdown-grid strong {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1;
+}
+
+/* Movimiento reducido: se mantiene el cambio de opacidad y color,
+   se retira el recorrido y el fondo fijo que genera parallax. */
+@media (prefers-reduced-motion: reduce) {
+  .invitationPage *,
+  .invitationPage *::before,
+  .invitationPage *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 150ms !important;
+  }
+
+  .invitationPage::before {
+    position: absolute;
+  }
+
+  .invitationPage .button:active,
+  .invitationPage .map-link:active,
+  .invitationPage .calendar-link:active,
+  .invitationPage .spotify-cta:active,
+  .invitationPage .radio-option:active,
+  .invitationPage .anniversary-card:active {
+    transform: none;
+    opacity: 0.75;
+  }
+}
+
+/* Transparencia reducida: superficies mas solidas y sin desenfoque */
+@media (prefers-reduced-transparency: reduce) {
+  .invitationPage .countdown-grid span,
+  .invitationPage .anniversary-card,
+  .invitationPage .map-card {
+    backdrop-filter: none;
+    background: var(--wine-dark);
+  }
+}
+
+/* Mas contraste: bordes definidos y texto secundario mas firme */
+@media (prefers-contrast: more) {
+  .invitationPage .countdown-grid span,
+  .invitationPage .anniversary-card,
+  .invitationPage .map-card,
+  .invitationPage input[type='text'],
+  .invitationPage input[type='number'] {
+    border-color: var(--gold);
+  }
+
+  .invitationPage .hero-text,
+  .invitationPage .purpose-section p,
+  .invitationPage .confirmation-copy p {
+    color: #ffffff;
+  }
+}
