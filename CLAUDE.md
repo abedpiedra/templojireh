@@ -18,26 +18,30 @@ Sitio web para **Templo Jireh**, una iglesia cristiana. Construido con Next.js 1
 app/
 ├── api/
 │   ├── auth/[...nextauth]/   # Autenticación NextAuth
-│   ├── sermones/             # CRUD sermones
-│   ├── eventos/              # CRUD eventos
-│   └── blog/                 # CRUD blog posts
+│   ├── users/                # CRUD usuarios del panel
+│   ├── youtube/              # Estado en vivo, videos y sincronización
+│   ├── invitacion-jovenes55/ # Confirmaciones del evento
+│   └── setup/                # Creación del primer administrador
 ├── admin/
 │   ├── login/                # Login admin
-│   ├── sermones/             # Gestión sermones
-│   ├── eventos/              # Gestión eventos
-│   └── blog/                 # Gestión blog
-├── sermones/                 # Página pública sermones
-├── eventos/                  # Página pública eventos
-├── blog/                     # Página pública blog
+│   ├── usuarios/             # Gestión de usuarios
+│   └── invitacion-jovenes55/ # Confirmaciones (CSV / PDF)
 ├── nosotros/                 # Página sobre nosotros
+├── en-vivo/                  # Transmisiones en vivo y archivo
+├── redes/                    # Redes sociales
 ├── contacto/                 # Página de contacto
+├── invitacion-jovenes55/     # Landing del aniversario 55
 └── page.tsx                  # Home
 lib/
 ├── mongodb.ts                # Conexión MongoDB
+├── spring.ts                 # Resortes, proyección de momentum, rubber-band
+├── useSheet.ts               # Hojas y cajones arrastrables
+├── horarios.ts               # Horarios y cálculo de próxima reunión
+├── youtube.ts                # Utilidades de enlaces de YouTube
 └── models/
-    ├── Sermon.ts             # Modelo sermones
-    ├── Evento.ts             # Modelo eventos
-    └── BlogPost.ts           # Modelo blog
+    ├── User.ts               # Modelo usuarios
+    ├── YouTubeVideo.ts       # Modelo videos sincronizados
+    └── YouthInvitationConfirmation.ts
 components/                   # Componentes reutilizables
 ```
 
@@ -51,6 +55,15 @@ ADMIN_EMAIL=              # Email del administrador
 ADMIN_PASSWORD=           # Contraseña del administrador
 ```
 
+## Integraciones externas
+
+- **YouTube Data API** (`YOUTUBE_API_KEY`): estado en vivo y sincronización de
+  videos hacia MongoDB.
+- **Facebook Graph API** (`FACEBOOK_PAGE_ID`, `FACEBOOK_PAGE_TOKEN`): publicaciones
+  de la página en `/redes`. Es **opcional**: sin las variables, `FacebookFeed`
+  cae automáticamente al plugin oficial de Facebook. El token se lee solo en
+  `app/api/facebook/posts/route.ts` y nunca llega al navegador.
+
 ## Comandos Útiles
 
 ```bash
@@ -58,6 +71,16 @@ npm run dev      # Desarrollo local (http://localhost:3000)
 npm run build    # Build de producción
 npm run start    # Iniciar en modo producción
 ```
+
+## Sistema de Diseño
+
+- Tokens en `tailwind.config.ts` (paleta tomada del logo: carmesí, granate, negro)
+- Fundamentos en `app/globals.css`: escala tipográfica con tracking por tamaño,
+  materiales translúcidos, respuesta al puntero y preferencias del sistema
+  (`prefers-reduced-motion`, `-transparency`, `-contrast`)
+- Movimiento con resortes interrumpibles (`lib/spring.ts`), nunca duraciones fijas
+  para lo que se puede tocar
+- Tamaño base de texto: `html { font-size }` en `globals.css` (un solo punto)
 
 ## Convenciones de Código
 

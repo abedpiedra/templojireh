@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import Link from 'next/link'
 
 export default function AdminLoginPage() {
@@ -10,7 +10,6 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,10 +24,11 @@ export default function AdminLoginPage() {
       })
 
       if (result?.error) {
-        setError('Usuario o contraseña incorrectos')
+        setError('Usuario o contraseña incorrectos.')
         setLoading(false)
       } else if (result?.ok) {
-        alert('Login exitoso! Redirigiendo...')
+        // El estado de exito se ve en el propio boton; el dialogo del sistema
+        // solo agregaba un paso extra antes de redirigir.
         window.location.replace('/admin')
       }
     } catch (err) {
@@ -39,67 +39,90 @@ export default function AdminLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-dark to-dark-light flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl p-10 w-full max-w-md">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-dark">
-            Templo <span className="text-primary">Jireh</span>
-          </h1>
-          <p className="text-gray-500 mt-2">Panel de Administración</p>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-dark p-4">
+      <div className="brand-wash absolute inset-0" aria-hidden="true" />
+
+      <div className="sheet-surface relative w-full max-w-md p-8 md:p-10">
+        <div className="mb-8 text-center">
+          <Image
+            src="/logo.png"
+            alt="Templo Jireh"
+            width={56}
+            height={56}
+            className="mx-auto mb-4 h-14 w-auto"
+          />
+          <h1 className="type-title-2 text-dark">Panel de administración</h1>
+          <p className="type-footnote text-ink-tertiary mt-1">
+            Ingresa con tu cuenta autorizada.
+          </p>
         </div>
 
         {error && (
-          <div className="bg-red-50 text-red-500 p-4 rounded-lg mb-6 text-center">
+          <div
+            role="alert"
+            className="mb-6 flex items-start gap-3 rounded-control bg-primary-tint px-4 py-3 type-footnote text-primary-dark"
+          >
+            <i className="fas fa-circle-exclamation mt-0.5"></i>
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
-          <div className="mb-5">
-            <label className="block text-gray-700 font-medium mb-2">Email</label>
-            <div className="relative">
-              <i className="fas fa-user absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors"
-                placeholder="admin@templojireh.com"
-                required
-              />
-            </div>
+          <div className="mb-4">
+            <label className="field-label" htmlFor="email">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              autoComplete="username"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="field"
+              placeholder="admin@templojireh.cl"
+              required
+            />
           </div>
 
           <div className="mb-6">
-            <label className="block text-gray-700 font-medium mb-2">Contraseña</label>
-            <div className="relative">
-              <i className="fas fa-lock absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none transition-colors"
-                placeholder="••••••••"
-                required
-              />
-            </div>
+            <label className="field-label" htmlFor="password">
+              Contraseña
+            </label>
+            <input
+              id="password"
+              type="password"
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="field"
+              placeholder="••••••••"
+              required
+            />
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-primary text-white py-4 rounded-lg font-semibold hover:bg-primary-dark transition-colors disabled:opacity-50"
+            className="btn-primary w-full py-4 disabled:opacity-60"
           >
             {loading ? (
-              <><i className="fas fa-spinner fa-spin mr-2"></i> Ingresando...</>
+              <>
+                <i className="fas fa-spinner fa-spin"></i> Ingresando…
+              </>
             ) : (
-              <><i className="fas fa-sign-in-alt mr-2"></i> Iniciar Sesión</>
+              <>
+                <i className="fas fa-arrow-right-to-bracket"></i> Iniciar sesión
+              </>
             )}
           </button>
         </form>
 
-        <div className="text-center mt-6">
-          <Link href="/" className="text-gray-500 hover:text-primary transition-colors">
+        {/* Nunca sin salida */}
+        <div className="mt-6 text-center">
+          <Link
+            href="/"
+            className="pressable type-footnote text-ink-tertiary hover:text-primary"
+          >
             <i className="fas fa-arrow-left mr-2"></i> Volver al sitio
           </Link>
         </div>

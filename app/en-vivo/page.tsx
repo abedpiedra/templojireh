@@ -1,9 +1,11 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
+import VideoModal, { type VideoEnReproduccion } from "@/components/VideoModal";
+import { etiquetaProximoServicio } from "@/lib/horarios";
 
 interface LiveData {
   isLive: boolean;
@@ -23,24 +25,44 @@ interface Video {
 
 type FilterType = "todos" | "semana" | "mes" | "fecha";
 
-const MONTHS = [
+const MESES = [
   "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+  "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
+];
+
+const filtros: { key: FilterType; label: string }[] = [
+  { key: "todos", label: "Todos" },
+  { key: "semana", label: "Esta semana" },
+  { key: "mes", label: "Este mes" },
+  { key: "fecha", label: "Por fecha" },
 ];
 
 export default function EnVivoPage() {
   const [liveData, setLiveData] = useState<LiveData>({ isLive: false });
   const [videos, setVideos] = useState<Video[]>([]);
-  const [filteredVideos, setFilteredVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<FilterType>("todos");
-  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
-  const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
-  // Generate default years (current year down to 2023)
   const currentYear = new Date().getFullYear();
-  const defaultYears = Array.from({ length: currentYear - 2022 }, (_, i) => currentYear - i);
+  const [selectedYear, setSelectedYear] = useState<number>(currentYear);
+  const [selectedMonth, setSelectedMonth] = useState<number | null>(null);
+  const defaultYears = useMemo(
+    () => Array.from({ length: currentYear - 2022 }, (_, i) => currentYear - i),
+    [currentYear],
+  );
   const [availableYears, setAvailableYears] = useState<number[]>(defaultYears);
   const carouselRef = useRef<HTMLDivElement>(null);
+  const [enReproduccion, setEnReproduccion] =
+    useState<VideoEnReproduccion | null>(null);
+  const [proximo, setProximo] = useState<{
+    nombre: string;
+    cuando: string;
+  } | null>(null);
+
+  // La hora local solo existe en el navegador
+  useEffect(() => {
+    const etiqueta = etiquetaProximoServicio();
+    if (etiqueta) setProximo({ nombre: etiqueta.nombre, cuando: etiqueta.cuando });
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -54,16 +76,15 @@ export default function EnVivoPage() {
         const videosJson = await videosRes.json();
 
         setLiveData(liveJson);
-        const videoList = videosJson.videos || [];
+        const videoList: Video[] = videosJson.videos || [];
         setVideos(videoList);
-        setFilteredVideos(videoList);
 
-        // Extract available years from videos and combine with default years
         if (videoList.length > 0) {
-          const yearsFromVideos = videoList.map((v: Video) => new Date(v.publishedAt).getFullYear());
-          const allYears = new Set([...yearsFromVideos, ...defaultYears]);
-          const years = Array.from(allYears) as number[];
-          setAvailableYears(years.sort((a: number, b: number) => b - a));
+          const yearsFromVideos = videoList.map((v) =>
+            new Date(v.publishedAt).getFullYear(),
+          );
+          const allYears = new Set<number>([...yearsFromVideos, ...defaultYears]);
+          setAvailableYears(Array.from(allYears).sort((a, b) => b - a));
         }
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -74,7 +95,6 @@ export default function EnVivoPage() {
 
     fetchData();
 
-    // Verificar cada 30 segundos si hay transmisión en vivo
     const interval = setInterval(async () => {
       try {
         const res = await fetch("/api/youtube/live");
@@ -86,185 +106,218 @@ export default function EnVivoPage() {
     }, 30000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [defaultYears]);
 
-  useEffect(() => {
-    applyFilters();
-  }, [activeFilter, selectedYear, selectedMonth, videos]);
-
-  const applyFilters = () => {
-    const now = new Date();
-    let filtered = [...videos];
-
+  // El resultado se deriva del estado: una sola fuente de verdad
+  const filteredVideos = useMemo(() => {
+    const now = Date.now();
     switch (activeFilter) {
-      case "semana":
-        const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-        filtered = videos.filter((v) => new Date(v.publishedAt) >= oneWeekAgo);
-        break;
-      case "mes":
-        const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-        filtered = videos.filter((v) => new Date(v.publishedAt) >= oneMonthAgo);
-        break;
+      case "semana": {
+        const desde = now - 7 * 24 * 60 * 60 * 1000;
+        return videos.filter((v) => new Date(v.publishedAt).getTime() >= desde);
+      }
+      case "mes": {
+        const desde = now - 30 * 24 * 60 * 60 * 1000;
+        return videos.filter((v) => new Date(v.publishedAt).getTime() >= desde);
+      }
       case "fecha":
-        filtered = videos.filter((v) => {
+        return videos.filter((v) => {
           const date = new Date(v.publishedAt);
-          const matchesYear = date.getFullYear() === selectedYear;
-          const matchesMonth = selectedMonth === null || date.getMonth() === selectedMonth;
-          return matchesYear && matchesMonth;
+          return (
+            date.getFullYear() === selectedYear &&
+            (selectedMonth === null || date.getMonth() === selectedMonth)
+          );
         });
-        break;
       default:
-        filtered = videos;
+        return videos;
     }
-
-    setFilteredVideos(filtered);
-  };
+  }, [videos, activeFilter, selectedYear, selectedMonth]);
 
   const handleFilterChange = (filter: FilterType) => {
     setActiveFilter(filter);
-    if (filter !== "fecha") {
-      setSelectedMonth(null);
-    }
+    if (filter !== "fecha") setSelectedMonth(null);
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("es-CL", {
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString("es-CL", {
       day: "numeric",
       month: "long",
       year: "numeric",
     });
-  };
 
   const scroll = (direction: "left" | "right") => {
-    if (carouselRef.current) {
-      const scrollAmount = 320; // Width of one card + gap
-      carouselRef.current.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth",
-      });
-    }
+    const el = carouselRef.current;
+    if (!el) return;
+    // El desplazamiento se mide en tarjetas visibles, no en pixeles fijos
+    const card = el.firstElementChild as HTMLElement | null;
+    const amount = card ? card.offsetWidth + 24 : 320;
+    el.scrollBy({
+      left: direction === "left" ? -amount : amount,
+      behavior: "smooth",
+    });
   };
-
-  const filters: { key: FilterType; label: string }[] = [
-    { key: "todos", label: "Todos" },
-    { key: "semana", label: "Esta semana" },
-    { key: "mes", label: "Este mes" },
-    { key: "fecha", label: "Por fecha" },
-  ];
 
   return (
     <>
       <Header />
-      <PageHeader title="En Vivo" breadcrumb="En Vivo" />
+      <PageHeader
+        title="Transmisiones"
+        breadcrumb="Transmisiones"
+        description="El culto en vivo cuando estamos al aire, y el archivo completo cuando no."
+      />
 
-      {/* Live Section */}
-      <section className="py-16 bg-gray-50">
+      <section className="bg-canvas-sunken py-14 md:py-16">
         <div className="container mx-auto px-4">
           {loading ? (
-            <div className="text-center py-16">
-              <i className="fas fa-spinner fa-spin text-4xl text-primary mb-4"></i>
-              <p className="text-gray-500">Cargando...</p>
+            // Esqueleto con la forma del contenido que viene, no un spinner suelto
+            <div className="mx-auto max-w-4xl">
+              <div className="aspect-video animate-pulse rounded-card bg-ink-quaternary/30" />
+              <div className="mt-4 h-6 w-2/3 animate-pulse rounded-full bg-ink-quaternary/30" />
+              <div className="mt-2 h-4 w-1/3 animate-pulse rounded-full bg-ink-quaternary/20" />
             </div>
           ) : liveData.isLive ? (
-            <div className="max-w-4xl mx-auto">
-              <div className="bg-red-600 text-white px-4 py-2 rounded-t-xl flex items-center gap-2">
-                <span className="relative flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
-                </span>
-                <span className="font-bold">EN VIVO AHORA</span>
-              </div>
-              <div className="bg-black rounded-b-xl overflow-hidden">
-                <div className="aspect-video">
+            <div className="mx-auto max-w-4xl">
+              <div className="overflow-hidden rounded-card shadow-floating">
+                <div className="flex items-center gap-2 bg-primary px-4 py-2.5 text-white">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                    <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-white"></span>
+                  </span>
+                  <span className="type-caption font-bold uppercase tracking-[0.08em]">
+                    En vivo ahora
+                  </span>
+                </div>
+                <div className="aspect-video bg-black">
                   <iframe
+                    title={liveData.title || "Transmisión en vivo"}
                     src={`https://www.youtube.com/embed/${liveData.videoId}?autoplay=1`}
-                    className="w-full h-full"
+                    className="h-full w-full"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                   ></iframe>
                 </div>
               </div>
-              <div className="bg-white p-6 rounded-xl shadow-lg mt-4">
-                <h2 className="text-2xl font-bold text-dark mb-2">
-                  {liveData.title}
-                </h2>
-                <p className="text-gray-600">{liveData.description}</p>
+              <div className="card mt-4 p-6">
+                <h2 className="type-title-2 text-dark">{liveData.title}</h2>
+                {liveData.description && (
+                  <p className="type-footnote text-ink-secondary mt-2 whitespace-pre-line">
+                    {liveData.description}
+                  </p>
+                )}
               </div>
             </div>
           ) : (
-            <div className="text-center py-16">
-              <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gray-200 flex items-center justify-center">
-                <i className="fas fa-video-slash text-4xl text-gray-400"></i>
+            <div className="card mx-auto max-w-xl p-10 text-center">
+              <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-canvas-sunken">
+                <i className="fas fa-video-slash text-xl text-ink-tertiary"></i>
               </div>
-              <h2 className="text-2xl font-bold text-dark mb-2">
-                No hay transmisión en vivo
+              <h2 className="type-title-2 text-dark">
+                No hay transmisión en este momento
               </h2>
-              <p className="text-gray-500 mb-6">
-                Vuelve pronto o revisa nuestras transmisiones anteriores
-              </p>
-              <a
-                href="https://www.youtube.com/@TemploJirehTV?sub_confirmation=1"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-primary inline-flex items-center gap-2"
-              >
-                <i className="fab fa-youtube"></i> Suscribirse al Canal
-              </a>
+              {proximo ? (
+                <p className="type-body text-ink-secondary mt-2">
+                  La próxima reunión es{" "}
+                  <strong className="text-ink">{proximo.nombre}</strong>,{" "}
+                  {proximo.cuando}. Mientras tanto, puedes ver el archivo más
+                  abajo.
+                </p>
+              ) : (
+                <p className="type-footnote text-ink-secondary mt-2">
+                  Mientras tanto, revisa el archivo más abajo.
+                </p>
+              )}
+              <div className="mt-6 flex flex-wrap justify-center gap-3">
+                <a
+                  href="https://www.youtube.com/@TemploJirehTV?sub_confirmation=1"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-primary"
+                >
+                  <i className="fab fa-youtube"></i> Avísame cuando transmitan
+                </a>
+                <a href="#archivo" className="btn-ghost">
+                  Ver transmisiones anteriores
+                </a>
+              </div>
             </div>
           )}
         </div>
       </section>
 
-      {/* Previous Streams */}
-      <section className="py-16">
+      <section id="archivo" className="py-16 md:py-20 scroll-mt-24">
         <div className="container mx-auto px-4">
-          <div className="text-center mb-8">
+          <div className="mb-8 max-w-xl">
             <p className="section-subtitle">Archivo</p>
-            <h2 className="section-title">Transmisiones Anteriores</h2>
+            <h2 className="section-title mb-0">Transmisiones anteriores</h2>
           </div>
 
-          {/* Filters */}
-          <div className="flex flex-wrap justify-center gap-3 mb-6">
-            {filters.map((filter) => (
-              <button
-                key={filter.key}
-                onClick={() => handleFilterChange(filter.key)}
-                className={`px-5 py-2 rounded-full text-sm font-medium transition-colors ${
-                  activeFilter === filter.key
-                    ? "bg-primary text-white"
-                    : "bg-white text-gray-600 shadow hover:bg-primary hover:text-white"
-                }`}
-              >
-                {filter.label}
-              </button>
-            ))}
+          {/* Control segmentado: el estado activo es evidente */}
+          <div
+            role="tablist"
+            aria-label="Filtrar transmisiones"
+            className="snap-row no-scrollbar -mx-4 mb-4 flex gap-2 overflow-x-auto px-4 pb-1"
+          >
+            {filtros.map((filter) => {
+              const activo = activeFilter === filter.key;
+              return (
+                <button
+                  key={filter.key}
+                  type="button"
+                  role="tab"
+                  aria-selected={activo}
+                  onPointerDown={() => handleFilterChange(filter.key)}
+                  onClick={() => handleFilterChange(filter.key)}
+                  className={`pressable snap-item shrink-0 rounded-full px-4 py-2 type-footnote font-medium ${
+                    activo
+                      ? "bg-dark text-white shadow-raised"
+                      : "bg-canvas-sunken text-ink-secondary hover:text-ink"
+                  }`}
+                >
+                  {filter.label}
+                </button>
+              );
+            })}
           </div>
 
-          {/* Year and Month selectors */}
+          {/* Los controles de fecha aparecen junto al filtro que los activa */}
           {activeFilter === "fecha" && (
-            <div className="flex flex-wrap justify-center gap-4 mb-10">
-              <div className="flex items-center gap-2">
-                <label className="text-gray-600 font-medium">Año:</label>
+            <div className="mb-8 flex flex-wrap gap-4 animate-rise-in">
+              <div>
+                <label className="field-label" htmlFor="anio">
+                  Año
+                </label>
                 <select
+                  id="anio"
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(Number(e.target.value))}
-                  className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none"
+                  className="field"
                 >
                   {availableYears.map((year) => (
-                    <option key={year} value={year}>{year}</option>
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
                   ))}
                 </select>
               </div>
-              <div className="flex items-center gap-2">
-                <label className="text-gray-600 font-medium">Mes:</label>
+              <div>
+                <label className="field-label" htmlFor="mes">
+                  Mes
+                </label>
                 <select
+                  id="mes"
                   value={selectedMonth ?? ""}
-                  onChange={(e) => setSelectedMonth(e.target.value === "" ? null : Number(e.target.value))}
-                  className="px-4 py-2 border-2 border-gray-200 rounded-lg focus:border-primary focus:outline-none"
+                  onChange={(e) =>
+                    setSelectedMonth(
+                      e.target.value === "" ? null : Number(e.target.value),
+                    )
+                  }
+                  className="field"
                 >
                   <option value="">Todos los meses</option>
-                  {MONTHS.map((month, index) => (
-                    <option key={index} value={index}>{month}</option>
+                  {MESES.map((month, index) => (
+                    <option key={month} value={index}>
+                      {month}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -272,91 +325,109 @@ export default function EnVivoPage() {
           )}
 
           {filteredVideos.length === 0 ? (
-            <div className="text-center py-12">
-              <i className="fab fa-youtube text-6xl text-gray-300 mb-4"></i>
-              <p className="text-gray-500">No hay videos en este período</p>
+            <div className="card p-12 text-center">
+              <i className="fab fa-youtube mb-4 block text-3xl text-ink-quaternary"></i>
+              <p className="type-body text-ink-secondary">
+                No hay transmisiones en este período.
+              </p>
+              {activeFilter !== "todos" && (
+                <button
+                  type="button"
+                  onPointerDown={() => handleFilterChange("todos")}
+                  onClick={() => handleFilterChange("todos")}
+                  className="btn-ghost mt-5"
+                >
+                  Ver todas
+                </button>
+              )}
             </div>
           ) : (
             <div className="relative">
-              {/* Navigation Buttons */}
               {filteredVideos.length > 3 && (
                 <>
                   <button
-                    onClick={() => scroll("left")}
-                    className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-white shadow-lg rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-colors -ml-4 hidden md:flex"
+                    type="button"
+                    aria-label="Anterior"
+                    onPointerDown={() => scroll("left")}
+                    className="pressable material-thick absolute left-0 top-1/2 z-10 -ml-5 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full shadow-floating md:flex"
                   >
-                    <i className="fas fa-chevron-left"></i>
+                    <i className="fas fa-chevron-left text-ink"></i>
                   </button>
                   <button
-                    onClick={() => scroll("right")}
-                    className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-12 h-12 bg-white shadow-lg rounded-full flex items-center justify-center text-gray-600 hover:bg-primary hover:text-white transition-colors -mr-4 hidden md:flex"
+                    type="button"
+                    aria-label="Siguiente"
+                    onPointerDown={() => scroll("right")}
+                    className="pressable material-thick absolute right-0 top-1/2 z-10 -mr-5 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full shadow-floating md:flex"
                   >
-                    <i className="fas fa-chevron-right"></i>
+                    <i className="fas fa-chevron-right text-ink"></i>
                   </button>
                 </>
               )}
 
-              {/* Carousel */}
               <div
                 ref={carouselRef}
-                className="flex gap-6 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide"
-                style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+                className="snap-row no-scrollbar -mx-4 flex gap-6 overflow-x-auto px-4 pb-4"
               >
                 {filteredVideos.map((video) => (
-                  <a
+                  <button
                     key={video.videoId}
-                    href={`https://www.youtube.com/watch?v=${video.videoId}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-shrink-0 w-[300px] snap-start card group cursor-pointer"
+                    type="button"
+                    onClick={() =>
+                      setEnReproduccion({
+                        id: video.videoId,
+                        titulo: video.title,
+                      })
+                    }
+                    className="card card-interactive snap-item w-[300px] flex-shrink-0 text-left"
                   >
-                    <div className="relative h-44 overflow-hidden">
+                    <div className="relative h-44 overflow-hidden bg-canvas-sunken">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={video.thumbnail}
                         alt={video.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        loading="lazy"
+                        className="h-full w-full object-cover"
                       />
-                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center text-white text-xl">
-                          <i className="fab fa-youtube"></i>
-                        </div>
-                      </div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/45 to-transparent" />
+                      <span className="absolute bottom-3 left-3 flex h-9 w-9 items-center justify-center rounded-full border border-white/30 bg-white/20 text-white backdrop-blur">
+                        <i className="fas fa-play text-xs"></i>
+                      </span>
                     </div>
                     <div className="p-4">
-                      <p className="text-primary text-xs mb-1">
-                        <i className="fas fa-calendar mr-1"></i>
+                      <p className="type-caption text-primary mb-1">
                         {formatDate(video.publishedAt)}
                       </p>
-                      <h3 className="font-semibold text-dark text-sm line-clamp-2">
+                      <h3 className="type-footnote font-semibold text-dark line-clamp-2">
                         {video.title}
                       </h3>
                     </div>
-                  </a>
+                  </button>
                 ))}
               </div>
 
-              {/* Scroll indicator for mobile */}
-              <div className="flex justify-center mt-4 md:hidden">
-                <p className="text-gray-400 text-sm">
-                  <i className="fas fa-arrows-alt-h mr-2"></i>
-                  Desliza para ver más
-                </p>
-              </div>
+              <p className="type-caption text-ink-tertiary mt-2 text-center md:hidden">
+                Desliza para ver más
+              </p>
             </div>
           )}
 
-          <div className="text-center mt-10">
+          <div className="mt-10 text-center">
             <a
               href="https://www.youtube.com/@TemploJirehTV/streams"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-primary inline-flex items-center gap-2"
+              className="btn-ghost"
             >
-              <i className="fab fa-youtube"></i> Ver Todos en YouTube
+              <i className="fab fa-youtube text-red-600"></i> Ver todas en YouTube
             </a>
           </div>
         </div>
       </section>
+
+      <VideoModal
+        video={enReproduccion}
+        onClose={() => setEnReproduccion(null)}
+      />
 
       <Footer />
     </>

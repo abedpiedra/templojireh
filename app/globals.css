@@ -2,34 +2,466 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+/* ============================================================
+   FUNDAMENTOS
+   Tipografia del sistema, materiales translucidos, respuesta
+   inmediata al puntero y respeto por las preferencias del usuario.
+   ============================================================ */
 
-body {
-  font-family: 'Poppins', sans-serif;
+:root {
+  /* Duraciones expresadas como "response" de un resorte, no como duracion fija */
+  --response-fast: 300ms;
+  --response: 400ms;
+  --press: 100ms;
+
+  /* Curvas: por defecto criticamente amortiguada (sin rebote) */
+  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-spring-in: cubic-bezier(1, 0, 0.68, 0.28);
+  --ease-bounce: cubic-bezier(0.34, 1.4, 0.64, 1);
+
+  /* Materiales */
+  --material-blur: 20px;
+  --material-saturate: 180%;
+  --material-light: rgba(255, 255, 255, 0.72);
+  --material-light-thin: rgba(255, 255, 255, 0.60);
+  --material-dark: rgba(16, 16, 18, 0.74);
+  --material-edge: rgba(255, 255, 255, 0.50);
+
+  /* Alto de la barra flotante, usado para el margen superior del contenido */
+  --chrome-height: 72px;
+}
+
+@layer base {
+  html {
+    /* El texto escala con la preferencia del usuario; el layout usa rem.
+       Base de 18px: sube toda la escala y el espaciado a la vez, sin
+       retocar cada componente. */
+    font-size: 112.5%;
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: theme('fontFamily.sans');
+    font-optical-sizing: auto;
+    line-height: 1.5;
+    color: theme('colors.ink.DEFAULT');
+    background-color: theme('colors.canvas.DEFAULT');
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    /* Elimina el retardo de ~300ms en tap y el flash gris de iOS */
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  button,
+  a,
+  [role='button'],
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
+  }
+
+  /* Tracking y leading especificos por tamano: nunca un valor unico */
+  h1 {
+    line-height: 1.05;
+    letter-spacing: -0.028em;
+  }
+  h2 {
+    line-height: 1.12;
+    letter-spacing: -0.022em;
+  }
+  h3 {
+    line-height: 1.2;
+    letter-spacing: -0.016em;
+  }
+  h4,
+  h5 {
+    line-height: 1.28;
+    letter-spacing: -0.01em;
+  }
+  p,
+  li {
+    letter-spacing: 0;
+  }
+  small,
+  .text-xs,
+  .text-\[11px\] {
+    letter-spacing: 0.01em;
+  }
+
+  /* Foco visible solo por teclado, con la forma del control */
+  :focus-visible {
+    outline: 2px solid theme('colors.primary.DEFAULT');
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  ::selection {
+    background: theme('colors.primary.tint');
+  }
 }
 
 @layer components {
-  .btn-primary {
-    @apply inline-block px-6 py-3 bg-primary text-white rounded-md font-medium transition-colors hover:bg-primary-dark;
+  /* ---------- Escala tipografica ----------
+     Jerarquia construida con peso + tamano + interlineado como conjunto. */
+  .type-display {
+    font-size: clamp(2.75rem, 6.4vw, 4.5rem);
+    line-height: 1.03;
+    letter-spacing: -0.032em;
+    font-weight: 700;
   }
-
-  .btn-secondary {
-    @apply inline-block px-6 py-3 bg-secondary text-white rounded-md font-medium transition-colors hover:bg-secondary-dark;
+  .type-title-1 {
+    font-size: clamp(2.125rem, 3.8vw, 2.875rem);
+    line-height: 1.1;
+    letter-spacing: -0.024em;
+    font-weight: 700;
   }
-
-  .btn-outline {
-    @apply inline-block px-6 py-3 border-2 border-white text-white rounded-md font-medium transition-colors hover:bg-white hover:text-dark;
+  .type-title-2 {
+    font-size: clamp(1.5rem, 2.4vw, 1.875rem);
+    line-height: 1.2;
+    letter-spacing: -0.018em;
+    font-weight: 600;
   }
-
-  .section-title {
-    @apply text-3xl md:text-4xl font-bold text-dark mb-4;
+  .type-title-3 {
+    font-size: 1.1875rem;
+    line-height: 1.3;
+    letter-spacing: -0.012em;
+    font-weight: 600;
   }
-
+  .type-body {
+    font-size: 1rem;
+    line-height: 1.6;
+    letter-spacing: 0;
+  }
+  .type-body-lg {
+    font-size: 1.1875rem;
+    line-height: 1.55;
+    letter-spacing: -0.004em;
+  }
+  .type-footnote {
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    letter-spacing: 0.005em;
+  }
+  .type-caption {
+    font-size: 0.8125rem;
+    line-height: 1.35;
+    letter-spacing: 0.012em;
+  }
+  /* Etiqueta de seccion: texto pequeno = tracking positivo */
   .section-subtitle {
-    @apply text-sm font-semibold text-primary uppercase tracking-wider mb-2;
+    @apply text-sm font-semibold uppercase text-primary mb-2;
+    letter-spacing: 0.08em;
+  }
+  .section-title {
+    @apply type-title-1 text-dark mb-4;
   }
 
+  /* ---------- Respuesta al puntero ----------
+     El feedback ocurre en pointer-down, no al soltar. */
+  .pressable {
+    transition:
+      transform var(--press) ease-out,
+      background-color var(--response-fast) var(--ease-spring),
+      color var(--response-fast) var(--ease-spring),
+      box-shadow var(--response-fast) var(--ease-spring),
+      opacity var(--response-fast) var(--ease-spring);
+    will-change: transform;
+  }
+  .pressable:active {
+    transform: scale(0.97);
+  }
+  /* Superficies grandes se comprimen menos: el desplazamiento debe verse igual */
+  .pressable-surface {
+    transition:
+      transform var(--press) ease-out,
+      box-shadow var(--response-fast) var(--ease-spring);
+  }
+  .pressable-surface:active {
+    transform: scale(0.988);
+  }
+
+  /* ---------- Controles ---------- */
+  .btn-base {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-control font-semibold;
+    font-size: 1rem;
+    letter-spacing: -0.006em;
+    transition:
+      transform var(--press) ease-out,
+      background-color var(--response-fast) var(--ease-spring),
+      color var(--response-fast) var(--ease-spring),
+      box-shadow var(--response-fast) var(--ease-spring);
+  }
+  .btn-base:active {
+    transform: scale(0.97);
+  }
+  .btn-primary {
+    @apply btn-base bg-primary text-white shadow-raised hover:bg-primary-dark;
+  }
+  .btn-secondary {
+    @apply btn-base bg-secondary text-white shadow-raised hover:bg-secondary-dark;
+  }
+  /* Boton de vidrio: material claro sobre fondo con imagen */
+  .btn-outline {
+    @apply btn-base text-white;
+    background: rgba(255, 255, 255, 0.14);
+    backdrop-filter: blur(var(--material-blur)) saturate(var(--material-saturate));
+    -webkit-backdrop-filter: blur(var(--material-blur)) saturate(var(--material-saturate));
+    border: 1px solid rgba(255, 255, 255, 0.35);
+  }
+  .btn-outline:hover {
+    background: rgba(255, 255, 255, 0.24);
+  }
+  .btn-ghost {
+    @apply btn-base text-ink;
+    background: rgba(16, 16, 18, 0.05);
+  }
+  .btn-ghost:hover {
+    background: rgba(16, 16, 18, 0.09);
+  }
+
+  /* ---------- Materiales ----------
+     Capa funcional flotante: el contenido pasa por debajo. */
+  .material {
+    background: var(--material-light);
+    backdrop-filter: blur(var(--material-blur)) saturate(var(--material-saturate));
+    -webkit-backdrop-filter: blur(var(--material-blur)) saturate(var(--material-saturate));
+  }
+  .material-thin {
+    background: var(--material-light-thin);
+    backdrop-filter: blur(12px) saturate(160%);
+    -webkit-backdrop-filter: blur(12px) saturate(160%);
+  }
+  /* Superficie mas grande = material mas grueso y sombra mas profunda */
+  .material-thick {
+    background: rgba(255, 255, 255, 0.82);
+    backdrop-filter: blur(32px) saturate(var(--material-saturate));
+    -webkit-backdrop-filter: blur(32px) saturate(var(--material-saturate));
+  }
+  .material-dark {
+    background: var(--material-dark);
+    backdrop-filter: blur(var(--material-blur)) saturate(var(--material-saturate));
+    -webkit-backdrop-filter: blur(var(--material-blur)) saturate(var(--material-saturate));
+  }
+  /* Borde superior brillante: la luz que atrapa el material */
+  .material-edge-top {
+    border-top: 1px solid var(--material-edge);
+  }
+  .material-edge-bottom {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.45);
+  }
+
+  /* Vibrancy: sobre material, el texto sube en peso y contraste,
+     nunca gris plano. */
+  .vibrant-primary {
+    color: rgba(16, 16, 18, 0.94);
+    font-weight: 500;
+    letter-spacing: 0.002em;
+  }
+  .vibrant-secondary {
+    color: rgba(16, 16, 18, 0.68);
+    font-weight: 500;
+    letter-spacing: 0.006em;
+  }
+  .vibrant-on-dark {
+    color: rgba(255, 255, 255, 0.96);
+    font-weight: 500;
+    letter-spacing: 0.004em;
+  }
+
+  /* Borde de scroll: degradado suave donde el contenido toca el chrome,
+     en lugar de un divisor de 1px */
+  .scroll-edge {
+    position: relative;
+  }
+  .scroll-edge::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -20px;
+    height: 20px;
+    pointer-events: none;
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.55),
+      rgba(255, 255, 255, 0)
+    );
+    opacity: 0;
+    transition: opacity var(--response-fast) var(--ease-spring);
+  }
+  .scroll-edge[data-scrolled='true']::after {
+    opacity: 1;
+  }
+
+  /* ---------- Superficies ---------- */
   .card {
-    @apply bg-white rounded-xl shadow-lg overflow-hidden transition-transform hover:-translate-y-1;
+    @apply bg-white rounded-card shadow-raised overflow-hidden;
+    transition:
+      transform var(--response-fast) var(--ease-spring),
+      box-shadow var(--response-fast) var(--ease-spring);
+  }
+  @media (hover: hover) {
+    .card-interactive:hover {
+      transform: translateY(-2px);
+      box-shadow: theme('boxShadow.floating');
+    }
+  }
+  .card-interactive:active {
+    transform: scale(0.988);
+    transition: transform var(--press) ease-out;
+  }
+
+  /* Hoja modal: dim + empuje del fondo hacia atras */
+  .sheet-surface {
+    @apply rounded-sheet shadow-sheet;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(32px) saturate(var(--material-saturate));
+    -webkit-backdrop-filter: blur(32px) saturate(var(--material-saturate));
+  }
+  .scrim {
+    background: rgba(16, 16, 18, 0.36);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+  }
+  /* Asa de arrastre: senala que la hoja se puede agarrar */
+  .sheet-grabber {
+    width: 36px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(16, 16, 18, 0.18);
+    margin: 0 auto;
+  }
+
+  /* Degradado de marca: mismo recorrido cromatico que la llama del logo */
+  .brand-gradient {
+    background: linear-gradient(180deg, #e4132f 0%, #c80f2c 32%, #7b122a 66%, #101012 100%);
+  }
+  .brand-wash {
+    background:
+      radial-gradient(90% 120% at 50% 0%, rgba(228, 19, 47, 0.30) 0%, rgba(16, 16, 18, 0) 62%),
+      linear-gradient(180deg, #101012 0%, #26262b 100%);
+  }
+
+  /* Campos de formulario: validacion inline, no al enviar */
+  .field {
+    @apply w-full rounded-control border border-separator bg-white px-4 py-3 text-ink;
+    font-size: 1rem;
+    transition:
+      border-color var(--response-fast) var(--ease-spring),
+      box-shadow var(--response-fast) var(--ease-spring),
+      background-color var(--response-fast) var(--ease-spring);
+  }
+  .field:focus {
+    outline: none;
+    border-color: theme('colors.primary.DEFAULT');
+    box-shadow: 0 0 0 4px theme('colors.primary.tint');
+  }
+  .field[aria-invalid='true'] {
+    border-color: theme('colors.primary.DEFAULT');
+  }
+  .field-label {
+    @apply type-footnote font-semibold text-ink-secondary mb-1.5 block;
+  }
+}
+
+@layer utilities {
+  /* Contenido que se desliza por debajo del chrome flotante */
+  .under-chrome {
+    padding-top: var(--chrome-height);
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  /* Momentum de scroll nativo en contenedores horizontales */
+  .snap-row {
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-x: contain;
+  }
+  .snap-item {
+    scroll-snap-align: start;
+  }
+}
+
+/* ============================================================
+   PREFERENCIAS DEL USUARIO
+   ============================================================ */
+
+/* Movimiento reducido: no significa "sin feedback", sino un
+   equivalente suave y no vestibular. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 150ms !important;
+    scroll-behavior: auto !important;
+  }
+  .pressable:active,
+  .pressable-surface:active,
+  .btn-base:active,
+  .card-interactive:active {
+    transform: none;
+    opacity: 0.7;
+  }
+  @media (hover: hover) {
+    .card-interactive:hover {
+      transform: none;
+    }
+  }
+}
+
+/* Transparencia reducida: superficies mas solidas, sin desenfoque. */
+@media (prefers-reduced-transparency: reduce) {
+  .material,
+  .material-thin,
+  .material-thick,
+  .sheet-surface {
+    background: #ffffff;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .material-dark {
+    background: #14141c;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .btn-outline {
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .scrim {
+    background: rgba(16, 16, 18, 0.6);
+    backdrop-filter: none;
+  }
+}
+
+/* Mas contraste: fondos casi solidos con borde definido. */
+@media (prefers-contrast: more) {
+  .material,
+  .material-thin,
+  .material-thick,
+  .sheet-surface {
+    background: #ffffff;
+    border-color: rgba(16, 16, 18, 0.5);
+  }
+  .card {
+    border: 1px solid rgba(16, 16, 18, 0.35);
+  }
+  .field {
+    border-color: rgba(16, 16, 18, 0.55);
+  }
+  .vibrant-secondary {
+    color: rgba(16, 16, 18, 0.9);
   }
 }

@@ -1,6 +1,33 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { Nunito_Sans } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
+
+// Nunito Sans: humanista, con eje optico real (opsz), asi la letra cambia de
+// forma segun el tamano en vez de escalarse igual en todos los niveles.
+// Se carga con el pipeline de Next: sin salto de layout y con `display: swap`.
+const nunitoSans = Nunito_Sans({
+  subsets: ["latin"],
+  axes: ["opsz"],
+  display: "swap",
+  variable: "--font-brand",
+  // Next no tiene metricas de ajuste para esta variable; el respaldo se
+  // declara a mano y se evita el aviso de override.
+  adjustFontFallback: false,
+  fallback: ["-apple-system", "BlinkMacSystemFont", "system-ui", "sans-serif"],
+});
+
+// La barra del navegador toma el negro del isotipo: el chrome del sistema
+// se integra con la pagina en lugar de cortarla.
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#101012" },
+  ],
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   title: {
@@ -134,11 +161,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es">
+    <html lang="es" className={nunitoSans.variable}>
       <head>
+        {/* Iconografia servida desde el propio dominio: sin CDN de terceros
+            bloqueando el primer pintado. */}
         <link
           rel="stylesheet"
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+          href="/vendor/fontawesome/css/all.min.css"
         />
         <script
           type="application/ld+json"

@@ -1,32 +1,25 @@
 'use client'
 
 import { signOut, useSession } from 'next-auth/react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { useSheet } from '@/lib/useSheet'
 
 const navItems = [
-  {
-    href: '/admin',
-    label: 'Dashboard',
-    icon: 'fas fa-home',
-    exact: true,
-  },
-  {
-    href: '/admin/sermones',
-    label: 'Sermones',
-    icon: 'fas fa-bible',
-  },
+  { href: '/admin', label: 'Panel', icon: 'fas fa-gauge', exact: true },
   {
     href: '/admin/invitacion-jovenes55',
-    label: 'Jovenes 55',
+    label: 'Jóvenes 55',
     icon: 'fas fa-clipboard-check',
   },
-  {
-    href: '/admin/usuarios',
-    label: 'Usuarios',
-    icon: 'fas fa-users',
-  },
+  { href: '/admin/usuarios', label: 'Usuarios', icon: 'fas fa-users' },
+]
+
+const salidas = [
+  { href: '/invitacion-jovenes55', label: 'Ver invitación', icon: 'fas fa-arrow-up-right-from-square' },
+  { href: '/', label: 'Ver sitio', icon: 'fas fa-globe' },
 ]
 
 function isActive(pathname: string, href: string, exact?: boolean) {
@@ -42,7 +35,13 @@ export default function AdminShell({
   const { data: session } = useSession()
   const [menuOpen, setMenuOpen] = useState(false)
 
-  // Cerrar el menu movil al cambiar de ruta
+  // El cajon entra y sale por el borde izquierdo, y se puede arrastrar
+  const { mounted, sheetRef, scrimRef, dragHandlers } = useSheet({
+    open: menuOpen,
+    onClose: () => setMenuOpen(false),
+    from: 'left',
+  })
+
   useEffect(() => {
     setMenuOpen(false)
   }, [pathname])
@@ -51,102 +50,111 @@ export default function AdminShell({
     return <>{children}</>
   }
 
-  return (
-    <div className="min-h-screen bg-gray-100">
-      {/* Barra superior (solo movil) */}
-      <header className="lg:hidden fixed top-0 inset-x-0 z-40 flex items-center justify-between h-16 px-4 bg-dark">
-        <h1 className="text-lg font-bold text-white">
-          Templo <span className="text-primary">Jireh</span>
-        </h1>
+  const navegacion = (
+    <nav className="space-y-1 p-3">
+      {navItems.map((item) => {
+        const active = isActive(pathname, item.href, item.exact)
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            aria-current={active ? 'page' : undefined}
+            className={`pressable flex items-center gap-3 rounded-control px-4 py-3 type-footnote font-medium ${
+              active
+                ? 'bg-primary text-white shadow-raised'
+                : 'text-white/65 hover:bg-white/10 hover:text-white'
+            }`}
+          >
+            <i className={`${item.icon} w-5 text-center`}></i>
+            {item.label}
+          </Link>
+        )
+      })}
+
+      <div className="my-3 border-t border-white/10"></div>
+
+      {salidas.map((item) => (
+        <Link
+          key={item.href}
+          href={item.href}
+          className="pressable flex items-center gap-3 rounded-control px-4 py-3 type-footnote text-white/65 hover:bg-white/10 hover:text-white"
+        >
+          <i className={`${item.icon} w-5 text-center`}></i>
+          {item.label}
+        </Link>
+      ))}
+
+      {session && (
         <button
-          onClick={() => setMenuOpen(true)}
-          aria-label="Abrir menu"
-          className="p-2 text-white text-2xl"
+          type="button"
+          onClick={() => signOut({ callbackUrl: '/admin/login' })}
+          className="pressable flex w-full items-center gap-3 rounded-control px-4 py-3 type-footnote text-white/65 hover:bg-white/10 hover:text-white"
+        >
+          <i className="fas fa-arrow-right-from-bracket w-5 text-center"></i>
+          Salir
+        </button>
+      )}
+    </nav>
+  )
+
+  const encabezado = (
+    <div className="flex items-center gap-3 border-b border-white/10 p-5">
+      <Image src="/logo.png" alt="" width={32} height={32} className="h-8 w-auto" />
+      <div>
+        <p className="type-title-3 text-white">Templo Jireh</p>
+        <p className="type-caption text-white/45">Panel de administración</p>
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="min-h-screen bg-canvas-sunken">
+      {/* Barra superior movil: capa translucida, el contenido pasa debajo */}
+      <header className="material-dark fixed inset-x-0 top-0 z-40 flex h-16 items-center justify-between px-4 lg:hidden">
+        <div className="flex items-center gap-2.5">
+          <Image src="/logo.png" alt="" width={26} height={26} className="h-6 w-auto" />
+          <span className="type-title-3 vibrant-on-dark">Panel</span>
+        </div>
+        <button
+          type="button"
+          onPointerDown={() => setMenuOpen(true)}
+          aria-label="Abrir menú"
+          aria-expanded={menuOpen}
+          className="pressable flex h-10 w-10 items-center justify-center rounded-full bg-white/10 text-white"
         >
           <i className="fas fa-bars"></i>
         </button>
       </header>
 
-      {/* Fondo oscuro al abrir el menu en movil */}
-      {menuOpen && (
-        <div
-          onClick={() => setMenuOpen(false)}
-          aria-hidden="true"
-          className="lg:hidden fixed inset-0 z-40 bg-black/50"
-        ></div>
+      {/* Cajon movil */}
+      {mounted && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div
+            ref={scrimRef}
+            className="scrim absolute inset-0"
+            style={{ opacity: 0 }}
+            onPointerDown={() => setMenuOpen(false)}
+            aria-hidden="true"
+          />
+          <aside
+            ref={sheetRef}
+            className="absolute inset-y-0 left-0 w-72 overflow-y-auto bg-dark shadow-sheet"
+            style={{ touchAction: 'pan-y' }}
+            {...dragHandlers}
+          >
+            {encabezado}
+            {navegacion}
+          </aside>
+        </div>
       )}
 
-      <aside
-        className={`w-64 bg-dark fixed inset-y-0 left-0 h-full overflow-y-auto z-50 transform transition-transform duration-300 lg:translate-x-0 ${
-          menuOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <div className="p-6 border-b border-white/10 flex items-start justify-between">
-          <div>
-            <h1 className="text-xl font-bold text-white">
-              Templo <span className="text-primary">Jireh</span>
-            </h1>
-            <p className="text-gray-500 text-sm mt-1">Panel Admin</p>
-          </div>
-          <button
-            onClick={() => setMenuOpen(false)}
-            aria-label="Cerrar menu"
-            className="lg:hidden text-gray-400 hover:text-white text-2xl leading-none"
-          >
-            &times;
-          </button>
-        </div>
-
-        <nav className="p-4 space-y-2">
-          {navItems.map((item) => {
-            const active = isActive(pathname, item.href, item.exact)
-
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-colors ${
-                  active
-                    ? 'bg-primary/20 text-primary'
-                    : 'text-gray-400 hover:bg-white/5'
-                }`}
-              >
-                <i className={`${item.icon} w-5`}></i>
-                {item.label}
-              </Link>
-            )
-          })}
-
-          <div className="border-t border-white/10 my-4"></div>
-
-          <Link
-            href="/invitacion-jovenes55"
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-white/5 transition-colors"
-          >
-            <i className="fas fa-external-link-alt w-5"></i>
-            Ver Invitacion
-          </Link>
-          <Link
-            href="/"
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-white/5 transition-colors"
-          >
-            <i className="fas fa-globe w-5"></i>
-            Ver Sitio
-          </Link>
-
-          {session ? (
-            <button
-              onClick={() => signOut({ callbackUrl: '/admin/login' })}
-              className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:bg-white/5 transition-colors"
-            >
-              <i className="fas fa-sign-out-alt w-5"></i>
-              Salir
-            </button>
-          ) : null}
-        </nav>
+      {/* Barra lateral fija en escritorio */}
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 overflow-y-auto bg-dark lg:block">
+        {encabezado}
+        {navegacion}
       </aside>
 
-      <main className="lg:ml-64 pt-20 lg:pt-8 px-4 sm:px-6 lg:px-8 pb-8">
+      <main className="px-4 pb-10 pt-20 sm:px-6 lg:ml-64 lg:px-8 lg:pt-8">
         {children}
       </main>
     </div>
