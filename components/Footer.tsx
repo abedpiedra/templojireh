@@ -1,4 +1,5 @@
 import Link from "next/link";
+import InvitacionJornada from "@/components/InvitacionJornada";
 
 const enlaces = [
   { href: "/", label: "Inicio" },
@@ -20,12 +21,7 @@ export default function Footer() {
       <div className="container mx-auto px-4">
         {/* Cierre con la accion principal: el pie tambien convierte */}
         <div className="mb-10 flex flex-wrap items-center justify-between gap-6 rounded-card bg-white/5 p-6 md:mb-12 md:p-8">
-          <div>
-            <p className="type-title-2">Te esperamos este domingo</p>
-            <p className="type-footnote text-white/60 mt-1">
-              Escuela Dominical 10:00 · Servicio de adoración 11:15
-            </p>
-          </div>
+          <InvitacionJornada tamano="compacto" />
           <div className="flex w-full gap-3 sm:w-auto sm:flex-wrap">
             <Link
               href="/contacto"

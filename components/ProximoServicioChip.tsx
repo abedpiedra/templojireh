@@ -1,25 +1,13 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { etiquetaProximoServicio } from '@/lib/horarios'
+import { useProximoServicio } from '@/lib/useProximoServicio'
 
 /**
  * Responde de inmediato la pregunta con la que llega casi toda visita
  * nueva: "cuando puedo ir". Se calcula con la hora local del visitante.
  */
 export default function ProximoServicioChip() {
-  const [etiqueta, setEtiqueta] = useState<{
-    nombre: string
-    icon: string
-    cuando: string
-  } | null>(null)
-
-  useEffect(() => {
-    setEtiqueta(etiquetaProximoServicio())
-    // Se refresca cada media hora por si la pestana queda abierta
-    const id = setInterval(() => setEtiqueta(etiquetaProximoServicio()), 1800000)
-    return () => clearInterval(id)
-  }, [])
+  const etiqueta = useProximoServicio()
 
   if (!etiqueta) return null
 

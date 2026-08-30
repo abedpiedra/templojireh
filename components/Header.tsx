@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useSheet } from "@/lib/useSheet";
 import WhatsAppFab from "@/components/WhatsAppFab";
 import BotonTema from "@/components/BotonTema";
-import { etiquetaProximoServicio } from "@/lib/horarios";
+import { useProximoServicio } from "@/lib/useProximoServicio";
 
 const navLinks = [
   { href: "/", label: "Inicio" },
@@ -26,9 +26,7 @@ export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLive, setIsLive] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [proximo, setProximo] = useState<{ nombre: string; cuando: string } | null>(
-    null,
-  );
+  const proximo = useProximoServicio();
   const pathname = usePathname();
   const headerRef = useRef<HTMLElement | null>(null);
 
@@ -65,13 +63,6 @@ export default function Header() {
       clearInterval(interval);
       controlador.abort();
     };
-  }, []);
-
-  // La hora local de quien visita solo existe en el navegador: se calcula
-  // despues del montaje para no desincronizar el HTML del servidor.
-  useEffect(() => {
-    const etiqueta = etiquetaProximoServicio();
-    if (etiqueta) setProximo({ nombre: etiqueta.nombre, cuando: etiqueta.cuando });
   }, []);
 
   // El borde de scroll aparece solo cuando el contenido pasa bajo el chrome

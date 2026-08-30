@@ -111,19 +111,17 @@ export default function FacebookFeed() {
 /**
  * Respaldo sin configuración: el plugin de página de Facebook.
  *
- * No se carga solo. El plugin trae los scripts de Meta, que en cada carga
- * arrojan decenas de errores propios a la consola (todos de fbcdn.net,
- * ninguno del sitio) y dejan cookies de seguimiento a quien solo pasaba
- * por la página. Se carga cuando la persona lo pide.
+ * Se carga de inmediato. Los scripts de Meta ensucian la consola con sus
+ * propios errores y dejan cookies de seguimiento; el camino para evitarlo
+ * es la Graph API, que dibuja las publicaciones sin iframe.
  */
 function PluginOficial() {
   const contenedor = useRef<HTMLDivElement | null>(null)
   const [ancho, setAncho] = useState<number | null>(null)
-  const [cargar, setCargar] = useState(false)
 
   useEffect(() => {
     const el = contenedor.current
-    if (!el || !cargar) return
+    if (!el) return
 
     // El plugin solo admite entre 180 y 500 px: se mide el contenedor real
     // y se vuelve a medir cuando cambia el tamaño de la ventana.
@@ -136,28 +134,7 @@ function PluginOficial() {
     const observer = new ResizeObserver(medir)
     observer.observe(el)
     return () => observer.disconnect()
-  }, [cargar])
-
-  if (!cargar) {
-    return (
-      <div className="card mx-auto w-full max-w-[500px] p-8 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-tint">
-          <i className="fab fa-facebook-f text-primary"></i>
-        </div>
-        <h3 className="type-title-3 text-ink">Publicaciones de Facebook</h3>
-        <p className="type-footnote text-ink-secondary mt-2">
-          Al cargarlas, Facebook puede registrar tu visita.
-        </p>
-        <button
-          type="button"
-          onClick={() => setCargar(true)}
-          className="btn-primary mt-5"
-        >
-          Cargar publicaciones
-        </button>
-      </div>
-    )
-  }
+  }, [])
 
   return (
     <div ref={contenedor} className="mx-auto w-full max-w-[500px]">
