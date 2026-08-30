@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { useAutoCarrusel } from '@/lib/useAutoCarrusel'
 import VideoModal, { type VideoEnReproduccion } from '@/components/VideoModal'
 
 interface Video {
@@ -22,6 +23,7 @@ export default function HomeTransmisiones() {
   const [cargando, setCargando] = useState(true)
   const [enReproduccion, setEnReproduccion] =
     useState<VideoEnReproduccion | null>(null)
+  const { ref, indice, irA } = useAutoCarrusel<HTMLDivElement>({ intervalo: 4000 })
 
   useEffect(() => {
     let vigente = true
@@ -47,11 +49,11 @@ export default function HomeTransmisiones() {
   if (cargando) {
     // Esqueleto con la forma del contenido que viene
     return (
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="snap-row no-scrollbar -mx-4 flex gap-5 overflow-x-auto px-4 md:mx-0 md:grid md:grid-cols-3 md:px-0">
         {[0, 1, 2].map((i) => (
           <div
             key={i}
-            className="h-72 animate-pulse rounded-card bg-ink-quaternary/20"
+            className="h-72 w-full shrink-0 animate-pulse rounded-card bg-ink-quaternary/20 md:w-auto"
           />
         ))}
       </div>
@@ -79,7 +81,13 @@ export default function HomeTransmisiones() {
 
   return (
     <>
-      <div className="grid gap-6 md:grid-cols-3">
+      {/* En el teléfono las tarjetas van en fila: apiladas obligaban a
+          recorrer tres pantallas para ver lo mismo. La tira avanza sola
+          y el dedo puede adelantarla o devolverla en cualquier momento. */}
+      <div
+        ref={ref}
+        className="snap-row no-scrollbar -mx-4 flex gap-5 overflow-x-auto px-4 pb-1 md:mx-0 md:grid md:grid-cols-3 md:px-0"
+      >
         {videos.map((video) => (
           <button
             key={video.videoId}
@@ -87,7 +95,9 @@ export default function HomeTransmisiones() {
             onClick={() =>
               setEnReproduccion({ id: video.videoId, titulo: video.title })
             }
-            className="card card-interactive w-full text-left"
+            // Una tarjeta completa por pantalla: dejar asomar la siguiente
+            // la mostraba partida y se leia como un recorte
+            className="card card-interactive snap-item w-full shrink-0 text-left md:w-auto"
           >
             <div className="relative h-48 overflow-hidden bg-canvas-sunken">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -117,6 +127,28 @@ export default function HomeTransmisiones() {
           </button>
         ))}
       </div>
+
+      {/* Posición dentro de la tira, solo donde el carrusel existe */}
+      {videos.length > 1 && (
+        <div className="mt-4 flex justify-center gap-2 md:hidden">
+          {videos.map((video, i) => (
+            <button
+              key={video.videoId}
+              type="button"
+              aria-label={`Ver transmisión ${i + 1}`}
+              aria-current={i === indice}
+              onPointerDown={() => irA(i)}
+              className="flex h-6 w-6 items-center justify-center"
+            >
+              <span
+                className={`block h-1.5 rounded-full transition-all duration-300 ease-spring ${
+                  i === indice ? 'w-5 bg-primary' : 'w-1.5 bg-ink-quaternary'
+                }`}
+              />
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="mt-8 text-center">
         <Link href="/en-vivo" className="btn-ghost">

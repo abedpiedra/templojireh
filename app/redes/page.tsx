@@ -40,7 +40,7 @@ export default function RedesSocialesPage() {
         description="Síguenos para enterarte de todo lo que pasa durante la semana."
       />
 
-      <section className="bg-canvas-sunken py-14 md:py-16">
+      <section className="bg-canvas-sunken seccion">
         <div className="container mx-auto px-4">
           {/* Todas las cuentas juntas y con el mismo peso: la persona
               elige la plataforma donde ya está. */}
@@ -79,26 +79,26 @@ export default function RedesSocialesPage() {
 
       {/* Facebook: encabezado compacto arriba y el muro a lo ancho, para
           que sirva tanto a las fichas propias como al plugin de respaldo. */}
-      <section className="py-14 md:py-16">
+      <section className="seccion">
         <div className="container mx-auto px-4">
-          <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-tint">
+          <div className="mb-8 flex flex-wrap items-end justify-between gap-5">
+            <div>
+              {/* En movil el icono va sobre el titulo: al costado, un titulo
+                  largo lo deja descolgado del bloque de texto */}
+              <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary-tint">
                 <i className="fab fa-facebook-f text-primary"></i>
               </div>
-              <div>
-                <h2 className="type-title-2 text-dark">Lo último en Facebook</h2>
-                <p className="type-footnote text-ink-tertiary">
-                  Fotos de cada actividad y los anuncios de la semana.
-                </p>
-              </div>
+              <h2 className="type-title-2 text-dark">Lo último en Facebook</h2>
+              <p className="type-footnote text-ink-tertiary mt-1">
+                Fotos de cada actividad y los anuncios de la semana.
+              </p>
             </div>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap">
               <a
                 href="https://www.facebook.com/Jirehchurch0498"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-primary"
+                className="btn-primary w-full sm:w-auto"
               >
                 <i className="fab fa-facebook-f"></i> Seguir en Facebook
               </a>
@@ -106,7 +106,7 @@ export default function RedesSocialesPage() {
                 href="https://wa.me/56957268552?text=Hola%2C%20quiero%20recibir%20los%20anuncios%20de%20Templo%20Jireh."
                 target="_blank"
                 rel="noopener noreferrer"
-                className="btn-ghost"
+                className="btn-ghost w-full sm:w-auto"
               >
                 <i className="fab fa-whatsapp text-[#25D366]"></i> Recibir anuncios
               </a>

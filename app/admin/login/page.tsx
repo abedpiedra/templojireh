@@ -121,7 +121,7 @@ export default function AdminLoginPage() {
         <div className="mt-6 text-center">
           <Link
             href="/"
-            className="pressable type-footnote text-ink-tertiary hover:text-primary"
+            className="pressable tactil type-footnote text-ink-tertiary hover:text-primary"
           >
             <i className="fas fa-arrow-left mr-2"></i> Volver al sitio
           </Link>

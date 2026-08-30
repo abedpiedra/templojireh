@@ -86,7 +86,7 @@ export default function ContactoPage() {
         description="Escríbenos, llámanos o visítanos. Respondemos por WhatsApp."
       />
 
-      <section className="bg-canvas-sunken py-14 md:py-16">
+      <section className="bg-canvas-sunken seccion">
         <div className="container mx-auto px-4">
           <div className="grid gap-8 md:grid-cols-2 md:gap-12">
             {/* Datos: cada uno accionable, junto a lo que afecta */}
