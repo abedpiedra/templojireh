@@ -9,24 +9,24 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Paleta tomada del logo: llama carmesi -> granate -> negro,
-        // sobre el gris muy claro del fondo del isotipo.
+        // Tokens oficiales del kit de marca (marca/.../colores-marca.css).
+        // No se ajustan a ojo: son los valores que entrega el manual.
         primary: {
-          DEFAULT: '#c80f2c',
-          dark: '#a20d25',
-          light: '#e4132f',
-          tint: 'rgba(200, 15, 44, 0.10)',
+          DEFAULT: '#d6122f', // rojo de marca
+          dark: '#a80e25',
+          light: '#ff4a5f', // rojo llama
+          tint: 'rgba(214, 18, 47, 0.10)',
         },
-        // Granate profundo del tramo bajo de la llama
+        // Vino: tramo bajo del degradado de la llama
         secondary: {
-          DEFAULT: '#7b122a',
-          dark: '#5c0d1f',
-          tint: 'rgba(123, 18, 42, 0.10)',
+          DEFAULT: '#690d24',
+          dark: '#4b0919',
+          tint: 'rgba(105, 13, 36, 0.10)',
         },
-        // El negro del isotipo, no un azul marino
+        // Grafito, no azul marino
         dark: {
-          DEFAULT: '#101012',
-          light: '#26262b',
+          DEFAULT: '#1c1c22',
+          light: '#3a3a44',
         },
         // Verde solo como color de estado (exito), nunca como color de marca
         success: {
@@ -34,21 +34,21 @@ const config: Config = {
           tint: 'rgba(36, 138, 61, 0.10)',
         },
         ink: {
-          DEFAULT: '#101012',
-          secondary: 'rgba(16, 16, 18, 0.62)',
-          tertiary: 'rgba(16, 16, 18, 0.42)',
-          quaternary: 'rgba(16, 16, 18, 0.20)',
+          DEFAULT: '#1c1c22',
+          secondary: 'rgba(28, 28, 34, 0.62)',
+          tertiary: 'rgba(28, 28, 34, 0.42)',
+          quaternary: 'rgba(28, 28, 34, 0.20)',
         },
-        separator: 'rgba(16, 16, 18, 0.10)',
+        separator: 'rgba(28, 28, 34, 0.10)',
         canvas: {
           DEFAULT: '#ffffff',
-          sunken: '#f5f5f7',
+          sunken: '#f4f4f6', // humo
           raised: '#ffffff',
         },
       },
       fontFamily: {
-        // Nunito Sans como voz de marca; el stack del sistema queda de respaldo
-        // inmediato (ya trae optical sizing y tablas de tracking).
+        // Montserrat: la tipografia que define el manual de marca.
+        // El stack del sistema queda de respaldo inmediato.
         sans: [
           'var(--font-brand)',
           '-apple-system',
@@ -70,10 +70,10 @@ const config: Config = {
       },
       boxShadow: {
         // Sombras conscientes del contexto: superficie mas grande = sombra mas profunda
-        chip: '0 1px 2px rgba(16, 16, 18, 0.06), 0 1px 1px rgba(16, 16, 18, 0.04)',
-        raised: '0 2px 8px rgba(16, 16, 18, 0.06), 0 1px 2px rgba(16, 16, 18, 0.04)',
-        floating: '0 12px 32px rgba(16, 16, 18, 0.10), 0 2px 8px rgba(16, 16, 18, 0.06)',
-        sheet: '0 24px 64px rgba(16, 16, 18, 0.20), 0 4px 12px rgba(16, 16, 18, 0.08)',
+        chip: '0 1px 2px rgba(28, 28, 34, 0.06), 0 1px 1px rgba(28, 28, 34, 0.04)',
+        raised: '0 2px 8px rgba(28, 28, 34, 0.06), 0 1px 2px rgba(28, 28, 34, 0.04)',
+        floating: '0 12px 32px rgba(28, 28, 34, 0.10), 0 2px 8px rgba(28, 28, 34, 0.06)',
+        sheet: '0 24px 64px rgba(28, 28, 34, 0.20), 0 4px 12px rgba(28, 28, 34, 0.08)',
       },
       transitionTimingFunction: {
         // Aproximaciones CSS a resortes criticamente amortiguados (sin overshoot)

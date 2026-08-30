@@ -24,7 +24,7 @@
   --material-saturate: 180%;
   --material-light: rgba(255, 255, 255, 0.72);
   --material-light-thin: rgba(255, 255, 255, 0.60);
-  --material-dark: rgba(16, 16, 18, 0.74);
+  --material-dark: rgba(28, 28, 34, 0.76);
   --material-edge: rgba(255, 255, 255, 0.50);
 
   /* Alto de la barra flotante, usado para el margen superior del contenido */
@@ -215,10 +215,10 @@
   }
   .btn-ghost {
     @apply btn-base text-ink;
-    background: rgba(16, 16, 18, 0.05);
+    background: rgba(28, 28, 34, 0.05);
   }
   .btn-ghost:hover {
-    background: rgba(16, 16, 18, 0.09);
+    background: rgba(28, 28, 34, 0.09);
   }
 
   /* ---------- Materiales ----------
@@ -255,12 +255,12 @@
   /* Vibrancy: sobre material, el texto sube en peso y contraste,
      nunca gris plano. */
   .vibrant-primary {
-    color: rgba(16, 16, 18, 0.94);
+    color: rgba(28, 28, 34, 0.94);
     font-weight: 500;
     letter-spacing: 0.002em;
   }
   .vibrant-secondary {
-    color: rgba(16, 16, 18, 0.68);
+    color: rgba(28, 28, 34, 0.68);
     font-weight: 500;
     letter-spacing: 0.006em;
   }
@@ -321,7 +321,7 @@
     -webkit-backdrop-filter: blur(32px) saturate(var(--material-saturate));
   }
   .scrim {
-    background: rgba(16, 16, 18, 0.36);
+    background: rgba(28, 28, 34, 0.36);
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
   }
@@ -330,18 +330,19 @@
     width: 36px;
     height: 5px;
     border-radius: 999px;
-    background: rgba(16, 16, 18, 0.18);
+    background: rgba(28, 28, 34, 0.18);
     margin: 0 auto;
   }
 
   /* Degradado de marca: mismo recorrido cromatico que la llama del logo */
   .brand-gradient {
-    background: linear-gradient(180deg, #e4132f 0%, #c80f2c 32%, #7b122a 66%, #101012 100%);
+    /* Mismo degradado que define el manual para la llama */
+    background: linear-gradient(160deg, #ff4a5f 0%, #d6122f 42%, #690d24 100%);
   }
   .brand-wash {
     background:
-      radial-gradient(90% 120% at 50% 0%, rgba(228, 19, 47, 0.30) 0%, rgba(16, 16, 18, 0) 62%),
-      linear-gradient(180deg, #101012 0%, #26262b 100%);
+      radial-gradient(90% 120% at 50% 0%, rgba(228, 19, 47, 0.30) 0%, rgba(28, 28, 34, 0) 62%),
+      linear-gradient(180deg, #1c1c22 0%, #3a3a44 100%);
   }
 
   /* Campos de formulario: validacion inline, no al enviar */
@@ -441,7 +442,7 @@
     -webkit-backdrop-filter: none;
   }
   .scrim {
-    background: rgba(16, 16, 18, 0.6);
+    background: rgba(28, 28, 34, 0.6);
     backdrop-filter: none;
   }
 }
@@ -453,15 +454,15 @@
   .material-thick,
   .sheet-surface {
     background: #ffffff;
-    border-color: rgba(16, 16, 18, 0.5);
+    border-color: rgba(28, 28, 34, 0.5);
   }
   .card {
-    border: 1px solid rgba(16, 16, 18, 0.35);
+    border: 1px solid rgba(28, 28, 34, 0.35);
   }
   .field {
-    border-color: rgba(16, 16, 18, 0.55);
+    border-color: rgba(28, 28, 34, 0.55);
   }
   .vibrant-secondary {
-    color: rgba(16, 16, 18, 0.9);
+    color: rgba(28, 28, 34, 0.9);
   }
 }

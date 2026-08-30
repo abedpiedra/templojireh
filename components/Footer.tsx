@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 const enlaces = [
@@ -44,10 +43,14 @@ export default function Footer() {
 
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-5">
           <div>
-            <div className="mb-3 flex items-center gap-2.5">
-              <Image src="/logo.png" alt="" width={28} height={28} className="h-7 w-auto" />
-              <p className="type-title-3">Templo Jireh</p>
-            </div>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo-templo-jireh-web-blanco.svg"
+              alt="Templo Jireh"
+              width={168}
+              height={36}
+              className="mb-4 h-9 w-auto"
+            />
             <p className="type-footnote text-white/60 max-w-xs">
               Una iglesia comprometida con llevar el mensaje de esperanza y
               salvación a nuestra comunidad. Te esperamos.

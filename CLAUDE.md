@@ -20,17 +20,14 @@ app/
 │   ├── auth/[...nextauth]/   # Autenticación NextAuth
 │   ├── users/                # CRUD usuarios del panel
 │   ├── youtube/              # Estado en vivo, videos y sincronización
-│   ├── invitacion-jovenes55/ # Confirmaciones del evento
 │   └── setup/                # Creación del primer administrador
 ├── admin/
 │   ├── login/                # Login admin
-│   ├── usuarios/             # Gestión de usuarios
-│   └── invitacion-jovenes55/ # Confirmaciones (CSV / PDF)
+│   └── usuarios/             # Gestión de usuarios
 ├── nosotros/                 # Página sobre nosotros
 ├── en-vivo/                  # Transmisiones en vivo y archivo
 ├── redes/                    # Redes sociales
 ├── contacto/                 # Página de contacto
-├── invitacion-jovenes55/     # Landing del aniversario 55
 └── page.tsx                  # Home
 lib/
 ├── mongodb.ts                # Conexión MongoDB
@@ -40,8 +37,7 @@ lib/
 ├── youtube.ts                # Utilidades de enlaces de YouTube
 └── models/
     ├── User.ts               # Modelo usuarios
-    ├── YouTubeVideo.ts       # Modelo videos sincronizados
-    └── YouthInvitationConfirmation.ts
+    └── YouTubeVideo.ts       # Modelo videos sincronizados
 components/                   # Componentes reutilizables
 ```
 
@@ -74,7 +70,17 @@ npm run start    # Iniciar en modo producción
 
 ## Sistema de Diseño
 
-- Tokens en `tailwind.config.ts` (paleta tomada del logo: carmesí, granate, negro)
+- Tokens en `tailwind.config.ts`, tomados del manual de marca
+  (kit completo en OneDrive: `JIREH ANIVERSARIO/Logos Jireh`, archivo
+  `01 Para la web y apps/colores-marca.css`):
+  rojo `#D6122F`, rojo llama `#FF4A5F`, vino `#690D24`, grafito `#1C1C22`,
+  humo `#F4F4F6`. Tipografía de marca: **Montserrat**
+- Recursos de marca servidos desde `public/`: `favicon.ico`, `icono-*.png`,
+  `apple-touch-icon-180x180.png`, `android-chrome-*.png`, `maskable-512x512.png`,
+  `og-image-1200x630.png`, `site.webmanifest`, `logo-templo-jireh-web.svg`
+  (y su versión blanca) e `isotipo-jireh.svg`
+- El kit completo (PDF y PNG de imprenta) NO vive en el repositorio: está en
+  OneDrive. En `public/` solo se guardan los recursos que el sitio sirve
 - Fundamentos en `app/globals.css`: escala tipográfica con tracking por tamaño,
   materiales translúcidos, respuesta al puntero y preferencias del sistema
   (`prefers-reduced-motion`, `-transparency`, `-contrast`)
