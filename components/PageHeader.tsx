@@ -22,7 +22,7 @@ export default function PageHeader({ title, breadcrumb, description }: PageHeade
       <div className="container mx-auto px-4 relative pt-16 pb-14 md:pt-24 md:pb-20">
         {/* Orientacion: donde estoy y como salgo */}
         <nav aria-label="Ruta" className="type-footnote text-white/60 mb-3">
-          <Link href="/" className="pressable inline-block hover:text-white">
+          <Link href="/" className="pressable tactil hover:text-white">
             Inicio
           </Link>
           <span className="mx-2 text-white/30">/</span>

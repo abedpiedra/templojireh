@@ -151,8 +151,8 @@
   }
   /* Etiqueta de seccion: texto pequeno = tracking positivo */
   .section-subtitle {
-    @apply text-sm font-semibold uppercase text-primary mb-2;
-    letter-spacing: 0.08em;
+    @apply text-xs sm:text-sm font-semibold uppercase text-primary mb-2;
+    letter-spacing: 0.07em;
   }
   .section-title {
     @apply type-title-1 text-dark mb-4;
@@ -185,6 +185,7 @@
   /* ---------- Controles ---------- */
   .btn-base {
     @apply inline-flex items-center justify-center gap-2 px-6 py-3 rounded-control font-semibold;
+    min-height: 44px;
     font-size: 1rem;
     letter-spacing: -0.006em;
     transition:
@@ -348,6 +349,7 @@
   /* Campos de formulario: validacion inline, no al enviar */
   .field {
     @apply w-full rounded-control border border-separator bg-white px-4 py-3 text-ink;
+    min-height: 44px;
     font-size: 1rem;
     transition:
       border-color var(--response-fast) var(--ease-spring),
@@ -368,6 +370,24 @@
 }
 
 @layer utilities {
+  /* Ritmo vertical de seccion. En un telefono, 90 px arriba y abajo
+     empujan el contenido fuera de pantalla; en escritorio si aportan. */
+  .seccion {
+    padding-top: 3.5rem;
+    padding-bottom: 3.5rem;
+  }
+  @media (min-width: 768px) {
+    .seccion {
+      padding-top: 6rem;
+      padding-bottom: 6rem;
+    }
+  }
+  /* Objetivo tactil minimo para enlaces que viven dentro de texto */
+  .tactil {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
   /* Contenido que se desliza por debajo del chrome flotante */
   .under-chrome {
     padding-top: var(--chrome-height);

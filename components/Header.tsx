@@ -38,19 +38,32 @@ export default function Header() {
   });
 
   useEffect(() => {
+    // El sondeo se cancela al desmontar, para no dejar peticiones sueltas
+    // ni actualizar estado de un componente que ya no existe.
+    const controlador = new AbortController();
+
     const checkLiveStatus = async () => {
       try {
-        const res = await fetch("/api/youtube/live");
+        const res = await fetch("/api/youtube/live", {
+          signal: controlador.signal,
+        });
+        if (!res.ok) return;
         const data = await res.json();
-        setIsLive(data.isLive);
-      } catch (error) {
-        console.error("Error checking live status:", error);
+        setIsLive(Boolean(data.isLive));
+      } catch {
+        // Saber si hay transmisión es un extra, no una función crítica:
+        // si la red falla, el aviso simplemente no aparece. Registrarlo
+        // cada minuto solo llenaría la consola de ruido.
+        setIsLive(false);
       }
     };
 
     checkLiveStatus();
     const interval = setInterval(checkLiveStatus, 60000);
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      controlador.abort();
+    };
   }, []);
 
   // La hora local de quien visita solo existe en el navegador: se calcula
@@ -136,13 +149,13 @@ export default function Header() {
         data-scrolled={scrolled}
         className="material material-edge-bottom scroll-edge sticky top-0 z-50 border-b border-separator"
       >
-        <div className="container mx-auto px-4 h-[4.5rem] flex justify-between items-center gap-4">
+        <div className="container mx-auto px-4 h-[3.75rem] md:h-[4.5rem] flex justify-between items-center gap-4">
           {/* Logotipo oficial: ya trae el nombre, no se duplica en texto.
               El SVG se sirve tal cual, sin pasar por el optimizador. */}
           <Link
             href="/"
             aria-label="Templo Jireh - Inicio"
-            className="pressable flex shrink-0 items-center"
+            className="pressable tactil flex shrink-0 items-center"
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
@@ -150,7 +163,7 @@ export default function Header() {
               alt="Templo Jireh"
               width={187}
               height={40}
-              className="h-9 w-auto md:h-10"
+              className="h-8 w-auto md:h-10"
             />
           </Link>
 
@@ -197,7 +210,7 @@ export default function Header() {
           {/* Boton de menu: responde en pointer-down */}
           <button
             type="button"
-            className="pressable md:hidden w-10 h-10 rounded-full flex items-center justify-center text-lg text-dark bg-ink-quaternary/30"
+            className="pressable md:hidden h-11 w-11 rounded-full flex items-center justify-center text-lg text-dark bg-ink-quaternary/30"
             aria-expanded={isMenuOpen}
             aria-controls="menu-movil"
             aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
@@ -222,7 +235,7 @@ export default function Header() {
           <div
             ref={sheetRef}
             id="menu-movil"
-            className="material-thick absolute left-0 right-0 top-[4.5rem] pointer-events-auto rounded-b-sheet shadow-floating pb-3"
+            className="material-thick absolute left-0 right-0 top-[3.75rem] md:top-[4.5rem] pointer-events-auto rounded-b-sheet shadow-floating pb-3"
             style={{ touchAction: "none" }}
             {...dragHandlers}
           >

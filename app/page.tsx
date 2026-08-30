@@ -3,6 +3,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProximoServicioChip from "@/components/ProximoServicioChip";
+import HorariosCarrusel from "@/components/HorariosCarrusel";
 import HomeTransmisiones from "./HomeTransmisiones";
 
 const horarios = [
@@ -64,12 +65,14 @@ export default function HomePage() {
       <Header />
 
       {/* Hero: una sola idea, jerarquia por peso y tamano */}
-      <section className="relative flex min-h-[78vh] items-center overflow-hidden bg-dark">
+      <section className="relative flex min-h-[72vh] md:min-h-[78vh] items-center overflow-hidden bg-dark">
         <Image
           src="https://images.unsplash.com/photo-1438232992991-995b7058bbb3?w=1920"
           alt=""
           fill
           priority
+          // Ocupa todo el ancho en cualquier pantalla
+          sizes="100vw"
           className="object-cover"
         />
         <div
@@ -80,7 +83,7 @@ export default function HomePage() {
           }}
           aria-hidden="true"
         />
-        <div className="container relative z-10 mx-auto px-4 py-24">
+        <div className="container relative z-10 mx-auto px-4 py-16 md:py-24">
           <div className="max-w-2xl text-white">
             <p className="section-subtitle text-primary-light">
               Iglesia Cristiana Pentecostal de Chile
@@ -99,11 +102,22 @@ export default function HomePage() {
               <ProximoServicioChip />
             </div>
 
-            <div className="mt-7 flex flex-wrap gap-3">
-              <Link href="/contacto" className="btn-primary">
+            {/* Los dos en una linea y del mismo ancho: en movil el texto y
+                el relleno se ajustan para que quepan sin partirse */}
+            <div className="mt-7 flex gap-3">
+              {/* min-w-0 permite que el boton se encoja por debajo del ancho
+                  de su texto: sin eso, en pantallas de 320 px el segundo
+                  quedaba cortado por el recorte del hero */}
+              <Link
+                href="/contacto"
+                className="btn-primary min-w-0 flex-1 px-3 text-center text-[0.875rem] sm:flex-none sm:px-6 sm:text-base"
+              >
                 Planifica tu visita
               </Link>
-              <Link href="/en-vivo" className="btn-outline">
+              <Link
+                href="/en-vivo"
+                className="btn-outline min-w-0 flex-1 px-3 text-center text-[0.875rem] sm:flex-none sm:px-6 sm:text-base"
+              >
                 Ver transmisiones
               </Link>
             </div>
@@ -115,29 +129,13 @@ export default function HomePage() {
           horizontal con snap en pantallas pequenas */}
       <section className="relative z-20 -mt-14 md:-mt-16">
         <div className="container mx-auto px-4">
-          <div className="material-thick rounded-card shadow-floating border border-white/40 overflow-hidden">
-            <div className="snap-row no-scrollbar flex overflow-x-auto md:grid md:grid-cols-4 md:overflow-visible">
-              {horarios.map((item) => (
-                <div
-                  key={item.title}
-                  className="snap-item min-w-[74%] sm:min-w-[46%] md:min-w-0 px-6 py-7 border-r border-separator last:border-r-0"
-                >
-                  <i
-                    className={`fas ${item.icon} text-primary text-xl mb-3 block`}
-                    aria-hidden="true"
-                  ></i>
-                  <h2 className="type-title-3 vibrant-primary">{item.title}</h2>
-                  <p className="type-footnote vibrant-secondary mt-1">{item.time}</p>
-                </div>
-              ))}
-            </div>
-          </div>
+          <HorariosCarrusel horarios={horarios} />
         </div>
       </section>
 
       {/* Transmisiones: el contenido que se publica cada semana y el que
           hace volver. Va arriba y se reproduce dentro del sitio. */}
-      <section id="transmisiones" className="py-20 md:py-24 scroll-mt-24">
+      <section id="transmisiones" className="seccion scroll-mt-24">
         <div className="container mx-auto px-4">
           <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -146,7 +144,7 @@ export default function HomePage() {
             </div>
             <Link
               href="/en-vivo"
-              className="pressable type-footnote font-semibold text-primary"
+              className="pressable tactil type-footnote font-semibold text-primary"
             >
               Ver todas <i className="fas fa-arrow-right ml-1 text-[11px]"></i>
             </Link>
@@ -157,7 +155,7 @@ export default function HomePage() {
       </section>
 
       {/* Sobre nosotros */}
-      <section className="bg-canvas-sunken py-20 md:py-24">
+      <section className="bg-canvas-sunken seccion">
         <div className="container mx-auto px-4">
           <div className="grid items-center gap-12 md:grid-cols-2 md:gap-16">
             <div className="relative h-[380px] overflow-hidden rounded-card shadow-floating">
@@ -165,6 +163,7 @@ export default function HomePage() {
                 src="/iglesia.png"
                 alt="Fachada del Templo Jireh"
                 fill
+                sizes="(min-width: 768px) 50vw, 100vw"
                 className="object-cover"
               />
             </div>
@@ -199,7 +198,7 @@ export default function HomePage() {
       </section>
 
       {/* Pastor */}
-      <section className="py-20 md:py-24">
+      <section className="seccion">
         <div className="container mx-auto px-4">
           <div className="grid items-center gap-12 md:grid-cols-2 md:gap-16">
             <div>
@@ -223,6 +222,7 @@ export default function HomePage() {
                 src="/prluis.png"
                 alt="Pastor Luis Luengo"
                 fill
+                sizes="(min-width: 768px) 50vw, 100vw"
                 className="object-cover object-top"
               />
             </div>
@@ -231,20 +231,27 @@ export default function HomePage() {
       </section>
 
       {/* Areas */}
-      <section className="bg-canvas-sunken py-20 md:py-24">
+      <section className="bg-canvas-sunken seccion">
         <div className="container mx-auto px-4">
           <div className="mb-12 max-w-xl">
             <p className="section-subtitle">Lo que hacemos</p>
             <h2 className="section-title">Nuestras áreas</h2>
           </div>
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-3 md:gap-6">
             {areas.map((item) => (
-              <article key={item.title} className="card p-7">
-                <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-tint">
-                  <i className={`fas ${item.icon} text-xl text-primary`}></i>
+              <article
+                key={item.title}
+                className="card flex gap-4 p-5 md:block md:p-7"
+              >
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary-tint md:mb-5 md:h-14 md:w-14">
+                  <i className={`fas ${item.icon} text-primary md:text-xl`}></i>
                 </div>
-                <h3 className="type-title-3 text-dark mb-2">{item.title}</h3>
-                <p className="type-footnote text-ink-secondary">{item.desc}</p>
+                <div>
+                  <h3 className="type-title-3 text-dark mb-1 md:mb-2">
+                    {item.title}
+                  </h3>
+                  <p className="type-footnote text-ink-secondary">{item.desc}</p>
+                </div>
               </article>
             ))}
           </div>
@@ -252,7 +259,7 @@ export default function HomePage() {
       </section>
 
       {/* Primera visita: quita las dudas que frenan a quien nunca ha venido */}
-      <section className="py-20 md:py-24">
+      <section className="seccion">
         <div className="container mx-auto px-4">
           <div className="mb-12 max-w-xl">
             <p className="section-subtitle">¿Es tu primera vez?</p>
@@ -261,25 +268,30 @@ export default function HomePage() {
               No hace falta que avises ni que traigas nada. Ven como estás.
             </p>
           </div>
-          <div className="grid gap-6 md:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-3 md:gap-6">
             {primeraVisita.map((item) => (
-              <article key={item.title} className="card p-7">
-                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-tint">
+              <article
+                key={item.title}
+                className="card flex gap-4 p-5 md:block md:p-7"
+              >
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary-tint md:mb-5 md:h-12 md:w-12">
                   <i className={`fas ${item.icon} text-primary`}></i>
                 </div>
-                <h3 className="type-title-3 text-dark mb-2">{item.title}</h3>
+                <div>
+                <h3 className="type-title-3 text-dark mb-1 md:mb-2">{item.title}</h3>
                 <p className="type-footnote text-ink-secondary">{item.desc}</p>
                 {item.href && (
                   <a
                     href={item.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="pressable mt-4 inline-flex items-center gap-2 type-footnote font-semibold text-primary"
+                    className="pressable tactil mt-2 gap-2 type-footnote font-semibold text-primary"
                   >
                     {item.linkLabel}
                     <i className="fas fa-arrow-right text-[11px]"></i>
                   </a>
                 )}
+                </div>
               </article>
             ))}
           </div>
@@ -287,7 +299,7 @@ export default function HomePage() {
       </section>
 
       {/* Invitacion final */}
-      <section className="relative overflow-hidden bg-dark py-20 text-center text-white md:py-24">
+      <section className="relative overflow-hidden bg-dark seccion text-center text-white">
         <div className="brand-wash absolute inset-0" aria-hidden="true" />
         <div className="container relative mx-auto px-4">
           <h2 className="type-title-1">Te esperamos este domingo</h2>
@@ -295,10 +307,10 @@ export default function HomePage() {
             Escuela Dominical a las 10:00 y servicio de adoración a las 11:15,
             en Presidente Alessandri #0498, La Granja.
           </p>
-          <div className="mt-8 flex flex-wrap justify-center gap-3">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
             <Link
               href="/contacto"
-              className="btn-base bg-white px-8 py-4 text-dark shadow-floating hover:bg-white/90"
+              className="btn-base w-full bg-white px-8 py-4 text-dark shadow-floating hover:bg-white/90 sm:w-auto"
             >
               Planifica tu visita
             </Link>
@@ -306,7 +318,7 @@ export default function HomePage() {
               href="https://maps.google.com/?q=Presidente+Alessandri+0498,+La+Granja"
               target="_blank"
               rel="noopener noreferrer"
-              className="btn-outline px-8 py-4"
+              className="btn-outline w-full px-8 py-4 sm:w-auto"
             >
               <i className="fas fa-location-dot"></i> Cómo llegar
             </a>

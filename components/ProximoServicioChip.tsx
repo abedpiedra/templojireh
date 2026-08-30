@@ -24,10 +24,15 @@ export default function ProximoServicioChip() {
   if (!etiqueta) return null
 
   return (
-    <p className="inline-flex items-center gap-2.5 rounded-full border border-white/25 bg-white/10 px-4 py-2 type-footnote text-white backdrop-blur animate-rise-in">
-      <i className={`fas ${etiqueta.icon} text-primary-light`}></i>
-      <span className="font-semibold">Próxima reunión:</span>
-      {etiqueta.nombre} · {etiqueta.cuando}
+    // Una sola linea y compacta. El nombre del servicio es lo unico que
+    // puede crecer ("Servicio de Adoración"), asi que es lo unico que se
+    // recorta si no cabe: el dia y la hora siempre quedan visibles.
+    <p className="inline-flex max-w-full items-center gap-2 rounded-full border border-white/25 bg-white/10 px-3.5 py-2 text-[0.8125rem] leading-none text-white backdrop-blur animate-rise-in sm:text-sm">
+      <i className={`fas ${etiqueta.icon} shrink-0 text-primary-light`}></i>
+      <span className="shrink-0 font-semibold text-white/70">Próxima:</span>
+      <span className="truncate">{etiqueta.nombre}</span>
+      <span className="shrink-0 text-white/50">·</span>
+      <span className="shrink-0">{etiqueta.cuando}</span>
     </p>
   )
 }

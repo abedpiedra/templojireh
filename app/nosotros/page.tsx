@@ -62,7 +62,7 @@ export default function NosotrosPage() {
         description="Quiénes somos, qué creemos y quién lidera esta comunidad."
       />
 
-      <section className="py-20 md:py-24">
+      <section className="seccion">
         <div className="container mx-auto px-4">
           <div className="mb-20 grid items-center gap-12 md:grid-cols-2 md:gap-16">
             <div>
@@ -94,6 +94,7 @@ export default function NosotrosPage() {
                 src="https://images.unsplash.com/photo-1438232992991-995b7058bbb3?w=800"
                 alt="Congregación reunida en el templo"
                 fill
+                sizes="(min-width: 768px) 50vw, 100vw"
                 className="object-cover"
               />
             </div>
@@ -105,6 +106,7 @@ export default function NosotrosPage() {
                 src="https://images.unsplash.com/photo-1529070538774-1843cb3265df?w=800"
                 alt="Comunidad de la iglesia"
                 fill
+                sizes="(min-width: 768px) 50vw, 100vw"
                 className="object-cover"
               />
             </div>
@@ -137,51 +139,71 @@ export default function NosotrosPage() {
         </div>
       </section>
 
-      <section className="bg-canvas-sunken py-20 md:py-24">
+      <section className="bg-canvas-sunken seccion">
         <div className="container mx-auto px-4">
           <div className="mb-12 max-w-xl">
             <p className="section-subtitle">Lo que creemos</p>
             <h2 className="section-title">Nuestros valores</h2>
           </div>
-          <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-4">
+          {/* En el teléfono el icono va al costado y no arriba: apiladas en
+              vertical, cuatro tarjetas altas ocupaban casi tres pantallas.
+              Dos columnas tampoco servían aquí, porque dejarían la
+              descripción en columnas de siete líneas. */}
+          <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 md:gap-6">
             {valores.map((item) => (
-              <article key={item.title} className="card p-7">
-                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-tint">
-                  <i className={`fas ${item.icon} text-lg text-primary`}></i>
+              <article
+                key={item.title}
+                className="card flex gap-4 p-5 md:block md:p-7"
+              >
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary-tint md:mb-5 md:h-12 md:w-12">
+                  <i className={`fas ${item.icon} text-primary md:text-lg`}></i>
                 </div>
-                <h3 className="type-title-3 text-dark mb-2">{item.title}</h3>
-                <p className="type-footnote text-ink-secondary">{item.desc}</p>
+                <div>
+                  <h3 className="type-title-3 text-dark mb-1 md:mb-2">
+                    {item.title}
+                  </h3>
+                  <p className="type-footnote text-ink-secondary">{item.desc}</p>
+                </div>
               </article>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="py-20 md:py-24">
+      <section className="seccion">
         <div className="container mx-auto px-4">
           <div className="mb-12 max-w-xl">
             <p className="section-subtitle">Liderazgo</p>
             <h2 className="section-title">Nuestro equipo</h2>
           </div>
-          <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-4">
+          {/* Dos columnas desde el teléfono: en una sola, cuatro retratos de
+              176 px obligaban a recorrer tres pantallas para ver al equipo,
+              y se perdía la sensación de grupo */}
+          <div className="grid grid-cols-2 gap-x-5 gap-y-8 md:grid-cols-4 md:gap-8">
             {equipo.map((person) => (
               <div key={person.name} className="text-center">
-                <div className="relative mx-auto mb-4 h-44 w-44 overflow-hidden rounded-full bg-canvas-sunken shadow-raised">
+                <div className="relative mx-auto mb-3 aspect-square w-full max-w-[9rem] overflow-hidden rounded-full bg-canvas-sunken shadow-raised md:mb-4 md:max-w-[11rem]">
                   {person.img ? (
                     <Image
                       src={person.img}
                       alt={person.name}
                       fill
+                      // Dos columnas en móvil, cuatro en escritorio
+                      sizes="(min-width: 768px) 176px, 45vw"
                       className="object-cover"
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center">
-                      <i className="fas fa-user text-4xl text-ink-quaternary"></i>
+                      <i className="fas fa-user text-3xl text-ink-quaternary md:text-4xl"></i>
                     </div>
                   )}
                 </div>
-                <h3 className="type-title-3 text-dark">{person.name}</h3>
-                <p className="type-footnote text-ink-tertiary mt-0.5">
+                {/* Dos líneas reservadas: sin esto, un nombre que se parte
+                    desalinea el cargo respecto a la columna de al lado */}
+                <h3 className="type-footnote flex min-h-[2.9em] items-start justify-center font-semibold text-dark md:type-title-3 md:min-h-0">
+                  {person.name}
+                </h3>
+                <p className="type-caption text-ink-tertiary mt-0.5 md:type-footnote">
                   {person.role}
                 </p>
               </div>
@@ -190,7 +212,7 @@ export default function NosotrosPage() {
         </div>
       </section>
 
-      <section className="relative overflow-hidden bg-dark py-20 text-center text-white md:py-24">
+      <section className="relative overflow-hidden bg-dark seccion text-center text-white">
         <div className="brand-wash absolute inset-0" aria-hidden="true" />
         <div className="container relative mx-auto px-4">
           <h2 className="type-title-1">¿Quieres conocernos?</h2>
