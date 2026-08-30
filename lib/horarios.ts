@@ -84,3 +84,48 @@ export function etiquetaProximoServicio(desde: Date = new Date()) {
     cuando: `${cuando} · ${hora}`,
   }
 }
+
+/** Todas las reuniones de un día de la semana, en orden de hora. */
+export function serviciosDelDia(dia: number) {
+  return HORARIOS.filter((h) => h.dia === dia).sort(
+    (a, b) => a.hora * 60 + a.minuto - (b.hora * 60 + b.minuto),
+  )
+}
+
+function hhmm(h: Horario) {
+  return `${String(h.hora).padStart(2, '0')}:${String(h.minuto).padStart(2, '0')}`
+}
+
+/**
+ * La próxima jornada completa, no solo la próxima reunión.
+ *
+ * Un domingo hay dos servicios: invitar solo al primero dejaría fuera al
+ * segundo, que es el más concurrido.
+ */
+export function proximaJornada(desde: Date = new Date()) {
+  const proximo = proximoServicio(desde)
+  if (!proximo) return null
+
+  const { fecha } = proximo
+  const hoy = new Date(desde)
+  hoy.setHours(0, 0, 0, 0)
+  const dia = new Date(fecha)
+  dia.setHours(0, 0, 0, 0)
+  const dias = Math.round((dia.getTime() - hoy.getTime()) / 86400000)
+
+  const cuando =
+    dias === 0 ? 'hoy' : dias === 1 ? 'mañana' : `este ${DIAS[fecha.getDay()]}`
+
+  // Solo las reuniones de ese día que todavía no han pasado
+  const servicios = serviciosDelDia(fecha.getDay()).filter((h) => {
+    if (dias !== 0) return true
+    const cuandoEs = new Date(desde)
+    cuandoEs.setHours(h.hora, h.minuto, 0, 0)
+    return cuandoEs.getTime() > desde.getTime()
+  })
+
+  return {
+    cuando,
+    detalle: servicios.map((h) => `${h.nombre} ${hhmm(h)}`).join(' · '),
+  }
+}

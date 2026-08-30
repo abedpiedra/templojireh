@@ -6,6 +6,7 @@ import ProximoServicioChip from "@/components/ProximoServicioChip";
 import SeccionEncabezado from "@/components/SeccionEncabezado";
 import TarjetaIcono from "@/components/TarjetaIcono";
 import BandaCta from "@/components/BandaCta";
+import InvitacionJornada from "@/components/InvitacionJornada";
 import HorariosCarrusel from "@/components/HorariosCarrusel";
 import HomeTransmisiones from "./HomeTransmisiones";
 
@@ -283,10 +284,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <BandaCta
-        titulo="Te esperamos este domingo"
-        texto="Escuela Dominical a las 10:00 y servicio de adoración a las 11:15, en Presidente Alessandri #0498, La Granja."
-      >
+      <BandaCta encabezado={<InvitacionJornada />}>
         <Link
           href="/contacto"
           className="btn-base w-full bg-white px-8 py-4 text-dark shadow-floating hover:bg-white/90 sm:w-auto"
