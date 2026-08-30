@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Montserrat } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
+import { GUION_SIN_DESTELLO } from "@/lib/tema";
 
 // Montserrat: la tipografia que define el manual de marca.
 // Se carga con el pipeline de Next: sin salto de layout y con `display: swap`.
@@ -17,7 +18,7 @@ const montserrat = Montserrat({
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#d6122f" },
-    { media: "(prefers-color-scheme: dark)", color: "#1c1c22" },
+    { media: "(prefers-color-scheme: dark)", color: "#121216" },
   ],
   width: "device-width",
   initialScale: 1,
@@ -52,6 +53,9 @@ export const metadata: Metadata = {
   // Iconos oficiales del kit de marca, en los tamanos que pide cada sistema
   icons: {
     icon: [
+      // El SVG va primero: los navegadores modernos lo prefieren y se ve
+      // nítido en cualquier tamaño. El .ico queda de respaldo.
+      { url: "/icono.svg", type: "image/svg+xml" },
       { url: "/favicon.ico", sizes: "any" },
       { url: "/icono-32x32.png", type: "image/png", sizes: "32x32" },
       { url: "/icono-96x96.png", type: "image/png", sizes: "96x96" },
@@ -163,8 +167,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es" className={montserrat.variable}>
+    <html
+      lang="es"
+      className={montserrat.variable}
+      // El guion de tema toca esta clase antes de hidratar; sin esto React
+      // avisa de una discrepancia que en realidad es intencional.
+      suppressHydrationWarning
+    >
       <head>
+        {/* Antes que cualquier estilo: fija el tema para que no haya un
+            destello claro al cargar de noche. */}
+        <script dangerouslySetInnerHTML={{ __html: GUION_SIN_DESTELLO }} />
         {/* Iconografia servida desde el propio dominio: sin CDN de terceros
             bloqueando el primer pintado. */}
         <link

@@ -4,6 +4,9 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
+import SeccionEncabezado from "@/components/SeccionEncabezado";
+import TarjetaIcono from "@/components/TarjetaIcono";
+import BandaCta from "@/components/BandaCta";
 
 export const metadata: Metadata = {
   title: "Nosotros",
@@ -141,30 +144,19 @@ export default function NosotrosPage() {
 
       <section className="bg-canvas-sunken seccion">
         <div className="container mx-auto px-4">
-          <div className="mb-12 max-w-xl">
-            <p className="section-subtitle">Lo que creemos</p>
-            <h2 className="section-title">Nuestros valores</h2>
-          </div>
+          <SeccionEncabezado etiqueta="Lo que creemos" titulo="Nuestros valores" />
           {/* En el teléfono el icono va al costado y no arriba: apiladas en
               vertical, cuatro tarjetas altas ocupaban casi tres pantallas.
               Dos columnas tampoco servían aquí, porque dejarían la
               descripción en columnas de siete líneas. */}
           <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4 md:gap-6">
             {valores.map((item) => (
-              <article
+              <TarjetaIcono
                 key={item.title}
-                className="card flex gap-4 p-5 md:block md:p-7"
-              >
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary-tint md:mb-5 md:h-12 md:w-12">
-                  <i className={`fas ${item.icon} text-primary md:text-lg`}></i>
-                </div>
-                <div>
-                  <h3 className="type-title-3 text-dark mb-1 md:mb-2">
-                    {item.title}
-                  </h3>
-                  <p className="type-footnote text-ink-secondary">{item.desc}</p>
-                </div>
-              </article>
+                icono={item.icon}
+                titulo={item.title}
+                texto={item.desc}
+              />
             ))}
           </div>
         </div>
@@ -172,10 +164,7 @@ export default function NosotrosPage() {
 
       <section className="seccion">
         <div className="container mx-auto px-4">
-          <div className="mb-12 max-w-xl">
-            <p className="section-subtitle">Liderazgo</p>
-            <h2 className="section-title">Nuestro equipo</h2>
-          </div>
+          <SeccionEncabezado etiqueta="Liderazgo" titulo="Nuestro equipo" />
           {/* Dos columnas desde el teléfono: en una sola, cuatro retratos de
               176 px obligaban a recorrer tres pantallas para ver al equipo,
               y se perdía la sensación de grupo */}
@@ -200,7 +189,7 @@ export default function NosotrosPage() {
                 </div>
                 {/* Dos líneas reservadas: sin esto, un nombre que se parte
                     desalinea el cargo respecto a la columna de al lado */}
-                <h3 className="type-footnote flex min-h-[2.9em] items-start justify-center font-semibold text-dark md:type-title-3 md:min-h-0">
+                <h3 className="type-footnote flex min-h-[2.9em] items-start justify-center font-semibold text-ink md:type-title-3 md:min-h-0">
                   {person.name}
                 </h3>
                 <p className="type-caption text-ink-tertiary mt-0.5 md:type-footnote">
@@ -212,22 +201,17 @@ export default function NosotrosPage() {
         </div>
       </section>
 
-      <section className="relative overflow-hidden bg-dark seccion text-center text-white">
-        <div className="brand-wash absolute inset-0" aria-hidden="true" />
-        <div className="container relative mx-auto px-4">
-          <h2 className="type-title-1">¿Quieres conocernos?</h2>
-          <p className="type-body-lg mx-auto mt-4 max-w-lg text-white/70">
-            Te invitamos a visitarnos este domingo y ser parte de nuestra
-            familia.
-          </p>
-          <Link
-            href="/contacto"
-            className="btn-base mt-8 bg-white px-8 py-4 text-dark shadow-floating hover:bg-white/90"
-          >
-            Planifica tu visita
-          </Link>
-        </div>
-      </section>
+      <BandaCta
+        titulo="¿Quieres conocernos?"
+        texto="Te invitamos a visitarnos este domingo y ser parte de nuestra familia."
+      >
+        <Link
+          href="/contacto"
+          className="btn-base w-full bg-white px-8 py-4 text-dark shadow-floating hover:bg-white/90 sm:w-auto"
+        >
+          Planifica tu visita
+        </Link>
+      </BandaCta>
 
       <Footer />
     </>

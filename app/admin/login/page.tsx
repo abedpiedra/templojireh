@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { signIn } from 'next-auth/react'
 import Link from 'next/link'
+import BotonTema from '@/components/BotonTema'
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState('')
@@ -41,6 +42,10 @@ export default function AdminLoginPage() {
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-dark p-4">
       <div className="brand-wash absolute inset-0" aria-hidden="true" />
 
+      <div className="absolute right-4 top-4">
+        <BotonTema claro />
+      </div>
+
       <div className="sheet-surface relative w-full max-w-md p-8 md:p-10">
         <div className="mb-8 text-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -51,7 +56,7 @@ export default function AdminLoginPage() {
             height={56}
             className="mx-auto mb-4 h-14 w-auto"
           />
-          <h1 className="type-title-2 text-dark">Panel de administración</h1>
+          <h1 className="type-title-2 text-ink">Panel de administración</h1>
           <p className="type-footnote text-ink-tertiary mt-1">
             Ingresa con tu cuenta autorizada.
           </p>

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useCallback, useEffect, useState } from 'react'
 import Modal from '@/components/Modal'
 import ConfirmDialog from '@/components/ConfirmDialog'
+import EstadoVacio from '@/components/EstadoVacio'
 
 interface User {
   _id: string
@@ -162,8 +163,8 @@ export default function AdminUsuariosPage() {
   if (status === 'loading' || loading) {
     return (
       <div className="space-y-6">
-        <div className="h-20 animate-pulse rounded-card bg-ink-quaternary/20" />
-        <div className="h-72 animate-pulse rounded-card bg-ink-quaternary/20" />
+        <div className="h-20 animate-pulse rounded-card bg-fill/20" />
+        <div className="h-72 animate-pulse rounded-card bg-fill/20" />
       </div>
     )
   }
@@ -173,7 +174,7 @@ export default function AdminUsuariosPage() {
       <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="section-subtitle">Acceso</p>
-          <h1 className="type-title-1 text-dark mb-0">Usuarios</h1>
+          <h1 className="type-title-1 text-ink mb-0">Usuarios</h1>
         </div>
         <button
           type="button"
@@ -196,13 +197,11 @@ export default function AdminUsuariosPage() {
 
       <div className="card">
         {usuarios.length === 0 ? (
-          <div className="p-16 text-center">
-            <i className="fas fa-users mb-4 block text-3xl text-ink-quaternary"></i>
-            <h2 className="type-title-3 text-dark">Todavía no hay usuarios</h2>
-            <p className="type-footnote text-ink-secondary mt-1">
-              Agrega el primero con el botón de arriba.
-            </p>
-          </div>
+          <EstadoVacio
+            icono="fas fa-users"
+            titulo="Todavía no hay usuarios"
+            texto="Agrega el primero con el botón de arriba."
+          />
         ) : (
           <>
             <div className="hidden overflow-x-auto md:block">
@@ -225,14 +224,14 @@ export default function AdminUsuariosPage() {
                       key={user._id}
                       className="border-b border-separator last:border-0 hover:bg-canvas-sunken"
                     >
-                      <td className="px-6 py-4 type-footnote font-semibold text-dark">
+                      <td className="px-6 py-4 type-footnote font-semibold text-ink">
                         {user.nombre}
                       </td>
                       <td className="px-6 py-4 type-footnote text-ink-secondary">
                         {user.email}
                       </td>
                       <td className="px-6 py-4">
-                        <span className="rounded-full bg-ink-quaternary/20 px-3 py-1 type-caption font-medium text-ink-secondary">
+                        <span className="rounded-full bg-fill/20 px-3 py-1 type-caption font-medium text-ink-secondary">
                           {user.rol === 'admin' ? 'Administrador' : 'Editor'}
                         </span>
                       </td>
@@ -244,7 +243,7 @@ export default function AdminUsuariosPage() {
                           className={`pressable rounded-full px-3 py-1 type-caption font-medium ${
                             user.activo
                               ? 'bg-success-tint text-success'
-                              : 'bg-ink-quaternary/25 text-ink-tertiary'
+                              : 'bg-fill/25 text-ink-tertiary'
                           }`}
                         >
                           {user.activo ? 'Activo' : 'Inactivo'}
@@ -256,7 +255,7 @@ export default function AdminUsuariosPage() {
                             type="button"
                             onClick={() => openEdit(user)}
                             aria-label={`Editar ${user.nombre}`}
-                            className="pressable flex h-9 w-9 items-center justify-center rounded-full bg-ink-quaternary/20 text-ink-secondary hover:text-ink"
+                            className="pressable flex h-9 w-9 items-center justify-center rounded-full bg-fill/20 text-ink-secondary hover:text-ink"
                           >
                             <i className="fas fa-pen text-xs"></i>
                           </button>
@@ -281,7 +280,7 @@ export default function AdminUsuariosPage() {
                 <li key={user._id} className="p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <p className="type-footnote font-semibold text-dark">
+                      <p className="type-footnote font-semibold text-ink">
                         {user.nombre}
                       </p>
                       <p className="type-caption text-ink-tertiary mt-0.5 truncate">
@@ -295,20 +294,20 @@ export default function AdminUsuariosPage() {
                       className={`pressable shrink-0 rounded-full px-3 py-1 type-caption font-medium ${
                         user.activo
                           ? 'bg-success-tint text-success'
-                          : 'bg-ink-quaternary/25 text-ink-tertiary'
+                          : 'bg-fill/25 text-ink-tertiary'
                       }`}
                     >
                       {user.activo ? 'Activo' : 'Inactivo'}
                     </button>
                   </div>
                   <div className="mt-3 flex items-center gap-2">
-                    <span className="rounded-full bg-ink-quaternary/20 px-3 py-1 type-caption text-ink-secondary">
+                    <span className="rounded-full bg-fill/20 px-3 py-1 type-caption text-ink-secondary">
                       {user.rol === 'admin' ? 'Administrador' : 'Editor'}
                     </span>
                     <button
                       type="button"
                       onClick={() => openEdit(user)}
-                      className="pressable rounded-full bg-ink-quaternary/20 px-4 py-1.5 type-caption font-medium text-ink"
+                      className="pressable rounded-full bg-fill/20 px-4 py-1.5 type-caption font-medium text-ink"
                     >
                       Editar
                     </button>

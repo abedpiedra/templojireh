@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import BotonTema from '@/components/BotonTema'
 
 export default function SetupPage() {
   const router = useRouter()
@@ -85,7 +86,7 @@ export default function SetupPage() {
   if (needsSetup === null) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-canvas-sunken">
-        <div className="h-10 w-10 animate-pulse rounded-full bg-ink-quaternary/40" />
+        <div className="h-10 w-10 animate-pulse rounded-full bg-fill/40" />
       </div>
     )
   }
@@ -105,6 +106,10 @@ export default function SetupPage() {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-dark p-4">
       <div className="brand-wash absolute inset-0" aria-hidden="true" />
+
+      <div className="absolute right-4 top-4">
+        <BotonTema claro />
+      </div>
       <div className="sheet-surface relative w-full max-w-md p-8 md:p-10">
         <div className="mb-8 text-center">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -115,7 +120,7 @@ export default function SetupPage() {
             height={56}
             className="mx-auto mb-4 h-14 w-auto"
           />
-          <h1 className="type-title-2 text-dark">Configuración inicial</h1>
+          <h1 className="type-title-2 text-ink">Configuración inicial</h1>
           <p className="type-footnote text-ink-tertiary mt-1">
             Solo se hace una vez.
           </p>
@@ -124,7 +129,7 @@ export default function SetupPage() {
         {success ? (
           <div className="py-8 text-center animate-rise-in">
             <i className="fas fa-circle-check mb-4 block text-4xl text-success"></i>
-            <h2 className="type-title-3 text-dark">Administrador creado</h2>
+            <h2 className="type-title-3 text-ink">Administrador creado</h2>
             <p className="type-footnote text-ink-secondary mt-1">
               Te llevamos al inicio de sesión…
             </p>

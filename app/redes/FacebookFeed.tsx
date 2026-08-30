@@ -58,7 +58,7 @@ export default function FacebookFeed() {
         {[0, 1, 2].map((i) => (
           <div
             key={i}
-            className="h-72 animate-pulse rounded-card bg-ink-quaternary/20"
+            className="h-72 animate-pulse rounded-card bg-fill/20"
           />
         ))}
       </div>
@@ -144,7 +144,7 @@ function PluginOficial() {
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-tint">
           <i className="fab fa-facebook-f text-primary"></i>
         </div>
-        <h3 className="type-title-3 text-dark">Publicaciones de Facebook</h3>
+        <h3 className="type-title-3 text-ink">Publicaciones de Facebook</h3>
         <p className="type-footnote text-ink-secondary mt-2">
           Al cargarlas, Facebook puede registrar tu visita.
         </p>

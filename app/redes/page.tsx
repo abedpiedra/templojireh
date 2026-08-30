@@ -2,6 +2,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import FacebookFeed from "./FacebookFeed";
+import SeccionEncabezado from "@/components/SeccionEncabezado";
 
 const cuentas = [
   {
@@ -58,7 +59,7 @@ export default function RedesSocialesPage() {
                     <i className={`${cuenta.icon} text-xl text-primary`}></i>
                   </div>
                   <div className="min-w-0">
-                    <h2 className="type-title-3 text-dark">{cuenta.name}</h2>
+                    <h2 className="type-title-3 text-ink">{cuenta.name}</h2>
                     <p className="type-footnote text-ink-tertiary truncate">
                       @{cuenta.username}
                     </p>
@@ -88,29 +89,19 @@ export default function RedesSocialesPage() {
               <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary-tint">
                 <i className="fab fa-facebook-f text-primary"></i>
               </div>
-              <h2 className="type-title-2 text-dark">Lo último en Facebook</h2>
+              <h2 className="type-title-2 text-ink">Lo último en Facebook</h2>
               <p className="type-footnote text-ink-tertiary mt-1">
                 Fotos de cada actividad y los anuncios de la semana.
               </p>
             </div>
-            <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:flex-wrap">
-              <a
-                href="https://www.facebook.com/Jirehchurch0498"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-primary w-full sm:w-auto"
-              >
-                <i className="fab fa-facebook-f"></i> Seguir en Facebook
-              </a>
-              <a
-                href="https://wa.me/56957268552?text=Hola%2C%20quiero%20recibir%20los%20anuncios%20de%20Templo%20Jireh."
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-ghost w-full sm:w-auto"
-              >
-                <i className="fab fa-whatsapp text-[#25D366]"></i> Recibir anuncios
-              </a>
-            </div>
+            <a
+              href="https://www.facebook.com/Jirehchurch0498"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-primary w-full sm:w-auto"
+            >
+              <i className="fab fa-facebook-f"></i> Seguir en Facebook
+            </a>
           </div>
 
           <FacebookFeed />

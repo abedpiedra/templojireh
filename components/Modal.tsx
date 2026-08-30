@@ -75,7 +75,7 @@ export default function Modal({
   const cabecera = (
     <div className="flex items-start justify-between gap-4 border-b border-separator px-6 py-5">
       <div>
-        <h2 className="type-title-2 text-dark">{title}</h2>
+        <h2 className="type-title-2 text-ink">{title}</h2>
         {description && (
           <p className="type-footnote text-ink-tertiary mt-1">{description}</p>
         )}
@@ -84,7 +84,7 @@ export default function Modal({
         type="button"
         onPointerDown={onClose}
         aria-label="Cerrar"
-        className="pressable -mr-2 -mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-ink-quaternary/25 text-ink-secondary"
+        className="pressable -mr-2 -mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-fill/25 text-ink-secondary"
       >
         <i className="fas fa-xmark"></i>
       </button>

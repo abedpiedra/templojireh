@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useSheet } from "@/lib/useSheet";
 import WhatsAppFab from "@/components/WhatsAppFab";
+import BotonTema from "@/components/BotonTema";
 import { etiquetaProximoServicio } from "@/lib/horarios";
 
 const navLinks = [
@@ -157,13 +158,25 @@ export default function Header() {
             aria-label="Templo Jireh - Inicio"
             className="pressable tactil flex shrink-0 items-center"
           >
+            {/* Dos versiones del mismo logotipo: la de tema claro lleva el
+                nombre en grafito y la de tema oscuro en blanco. Se conmutan
+                con CSS para que no haya un salto al hidratar. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src="/logo-templo-jireh-web.svg"
               alt="Templo Jireh"
               width={187}
               height={40}
-              className="h-8 w-auto md:h-10"
+              className="h-8 w-auto md:h-10 dark:hidden"
+            />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/logo-templo-jireh-web-oscuro.svg"
+              alt=""
+              aria-hidden="true"
+              width={187}
+              height={40}
+              className="hidden h-8 w-auto md:h-10 dark:block"
             />
           </Link>
 
@@ -182,7 +195,7 @@ export default function Header() {
                       className={`pressable relative flex items-center gap-1.5 rounded-full px-3.5 py-2 type-footnote font-medium ${
                         active
                           ? "bg-primary-tint text-primary"
-                          : "text-ink-secondary hover:bg-ink-quaternary/40 hover:text-ink"
+                          : "text-ink-secondary hover:bg-fill/40 hover:text-ink"
                       }`}
                     >
                       {link.label}
@@ -196,7 +209,10 @@ export default function Header() {
                   </li>
                 );
               })}
-              <li className="ml-2">
+              <li className="ml-1">
+                <BotonTema />
+              </li>
+              <li className="ml-1">
                 <Link
                   href="/contacto"
                   className="pressable inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2 type-footnote font-semibold text-white shadow-raised hover:bg-primary-dark"
@@ -207,17 +223,20 @@ export default function Header() {
             </ul>
           </nav>
 
-          {/* Boton de menu: responde en pointer-down */}
-          <button
+          <div className="flex items-center gap-1 md:hidden">
+            <BotonTema />
+            {/* Boton de menu: responde en pointer-down */}
+            <button
             type="button"
-            className="pressable md:hidden h-11 w-11 rounded-full flex items-center justify-center text-lg text-dark bg-ink-quaternary/30"
+              className="pressable h-11 w-11 rounded-full flex items-center justify-center text-lg text-ink bg-fill/30"
             aria-expanded={isMenuOpen}
             aria-controls="menu-movil"
             aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
             onPointerDown={() => setIsMenuOpen((v) => !v)}
           >
-            <i className={`fas ${isMenuOpen ? "fa-xmark" : "fa-bars"}`}></i>
-          </button>
+              <i className={`fas ${isMenuOpen ? "fa-xmark" : "fa-bars"}`}></i>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -285,7 +304,7 @@ export default function Header() {
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={item.label}
-                  className="pressable w-10 h-10 rounded-full bg-ink-quaternary/30 flex items-center justify-center vibrant-primary"
+                  className="pressable w-10 h-10 rounded-full bg-fill/30 flex items-center justify-center vibrant-primary"
                 >
                   <i className={item.icon}></i>
                 </a>

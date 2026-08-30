@@ -98,7 +98,7 @@ export default function ContactoPage() {
                       <i className={`fas ${item.icon} text-primary`}></i>
                     </div>
                     <div>
-                      <h2 className="type-title-3 text-dark">{item.title}</h2>
+                      <h2 className="type-title-3 text-ink">{item.title}</h2>
                       {item.lines.map((line) => (
                         <p key={line} className="type-footnote text-ink-secondary">
                           {line}
@@ -133,7 +133,7 @@ export default function ContactoPage() {
                     <i className="fas fa-map-marker-alt text-primary"></i>
                   </div>
                   <div>
-                    <h2 className="type-title-3 text-dark">Dirección</h2>
+                    <h2 className="type-title-3 text-ink">Dirección</h2>
                     <p className="type-footnote text-ink-secondary">
                       Presidente Alessandri #0498, La Granja
                     </p>
@@ -152,7 +152,7 @@ export default function ContactoPage() {
 
             {/* Formulario */}
             <div className="card p-6 md:p-8">
-              <h2 className="type-title-2 text-dark">Envíanos un mensaje</h2>
+              <h2 className="type-title-2 text-ink">Envíanos un mensaje</h2>
               <p className="type-footnote text-ink-tertiary mt-1 mb-6">
                 Se abrirá WhatsApp con el mensaje ya escrito para que lo
                 revises antes de enviarlo.
