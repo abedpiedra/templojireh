@@ -72,12 +72,12 @@ export default function AdminDashboard() {
     // Esqueleto con la forma del panel, no un spinner a pantalla completa
     return (
       <div className="space-y-6">
-        <div className="h-20 animate-pulse rounded-card bg-ink-quaternary/20" />
+        <div className="h-20 animate-pulse rounded-card bg-fill/20" />
         <div className="grid gap-6 sm:grid-cols-2">
           {[0, 1].map((i) => (
             <div
               key={i}
-              className="h-32 animate-pulse rounded-card bg-ink-quaternary/20"
+              className="h-32 animate-pulse rounded-card bg-fill/20"
             />
           ))}
         </div>
@@ -103,7 +103,7 @@ export default function AdminDashboard() {
       <header className="mb-8">
         <p className="section-subtitle">Administración</p>
         <div className="flex flex-wrap items-end justify-between gap-3">
-          <h1 className="type-title-1 text-dark mb-0">Panel de control</h1>
+          <h1 className="type-title-1 text-ink mb-0">Panel de control</h1>
           <p className="type-footnote text-ink-tertiary">
             Hola, <strong className="text-ink">{session.user?.name || 'Admin'}</strong>
           </p>
@@ -116,7 +116,7 @@ export default function AdminDashboard() {
             <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-primary-tint">
               <i className={`${t.icon} text-primary`}></i>
             </div>
-            <p className="type-display text-dark" style={{ fontSize: '2.25rem' }}>
+            <p className="type-display text-ink" style={{ fontSize: '2.25rem' }}>
               {t.valor}
             </p>
             <p className="type-footnote text-ink-secondary mt-1">{t.label}</p>
@@ -125,7 +125,7 @@ export default function AdminDashboard() {
       </div>
 
       <section className="card p-6 md:p-8">
-        <h2 className="type-title-2 text-dark mb-1">Acciones rápidas</h2>
+        <h2 className="type-title-2 text-ink mb-1">Acciones rápidas</h2>
         <p className="type-footnote text-ink-tertiary mb-6">
           Lo que se usa a diario, a un toque de distancia.
         </p>
@@ -135,14 +135,14 @@ export default function AdminDashboard() {
             type="button"
             onClick={sincronizarYoutube}
             disabled={sync.estado === 'sincronizando'}
-            className="pressable flex items-center gap-4 rounded-card bg-canvas-sunken p-5 text-left hover:bg-ink-quaternary/20 disabled:opacity-60"
+            className="pressable flex items-center gap-4 rounded-card bg-canvas-sunken p-5 text-left hover:bg-fill/20 disabled:opacity-60"
           >
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-white">
               <i
                 className={`fas fa-rotate ${sync.estado === 'sincronizando' ? 'fa-spin' : ''}`}
               ></i>
             </span>
-            <span className="type-footnote font-semibold text-dark">
+            <span className="type-footnote font-semibold text-ink">
               {sync.estado === 'sincronizando'
                 ? 'Sincronizando…'
                 : 'Sincronizar YouTube'}
@@ -151,12 +151,12 @@ export default function AdminDashboard() {
 
           <Link
             href="/admin/usuarios"
-            className="pressable flex items-center gap-4 rounded-card bg-canvas-sunken p-5 hover:bg-ink-quaternary/20"
+            className="pressable flex items-center gap-4 rounded-card bg-canvas-sunken p-5 hover:bg-fill/20"
           >
             <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-dark text-white">
               <i className="fas fa-users"></i>
             </span>
-            <span className="type-footnote font-semibold text-dark">
+            <span className="type-footnote font-semibold text-ink">
               Gestionar usuarios
             </span>
           </Link>

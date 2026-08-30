@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useSheet } from '@/lib/useSheet'
+import BotonTema from '@/components/BotonTema'
 
 const navItems = [
   { href: '/admin', label: 'Panel', icon: 'fas fa-gauge', exact: true },
@@ -77,6 +78,10 @@ export default function AdminShell({
         </Link>
       ))}
 
+      <div className="hidden px-4 py-2 lg:block">
+        <BotonTema claro />
+      </div>
+
       {session && (
         <button
           type="button"
@@ -119,6 +124,8 @@ export default function AdminShell({
           />
           <span className="type-title-3 vibrant-on-dark">Panel</span>
         </div>
+        <div className="flex items-center gap-1">
+        <BotonTema claro />
         <button
           type="button"
           onPointerDown={() => setMenuOpen(true)}
@@ -128,6 +135,7 @@ export default function AdminShell({
         >
           <i className="fas fa-bars"></i>
         </button>
+        </div>
       </header>
 
       {/* Cajon movil */}

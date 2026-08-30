@@ -3,6 +3,8 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useAutoCarrusel } from '@/lib/useAutoCarrusel'
+import EstadoVacio from '@/components/EstadoVacio'
+import PuntosCarrusel from '@/components/PuntosCarrusel'
 import VideoModal, { type VideoEnReproduccion } from '@/components/VideoModal'
 
 interface Video {
@@ -53,7 +55,7 @@ export default function HomeTransmisiones() {
         {[0, 1, 2].map((i) => (
           <div
             key={i}
-            className="h-72 w-full shrink-0 animate-pulse rounded-card bg-ink-quaternary/20 md:w-auto"
+            className="h-72 w-full shrink-0 animate-pulse rounded-card bg-fill/20 md:w-auto"
           />
         ))}
       </div>
@@ -62,20 +64,19 @@ export default function HomeTransmisiones() {
 
   if (videos.length === 0) {
     return (
-      <div className="card p-12 text-center">
-        <i className="fab fa-youtube mb-4 block text-3xl text-ink-quaternary"></i>
-        <p className="type-body text-ink-secondary">
-          Las transmisiones aparecerán aquí apenas se publiquen.
-        </p>
+      <EstadoVacio
+        icono="fab fa-youtube"
+        texto="Las transmisiones aparecerán aquí apenas se publiquen."
+      >
         <a
           href="https://www.youtube.com/@TemploJirehTV/streams"
           target="_blank"
           rel="noopener noreferrer"
-          className="btn-ghost mt-5"
+          className="btn-ghost"
         >
           <i className="fab fa-youtube text-red-600"></i> Ver el canal
         </a>
-      </div>
+      </EstadoVacio>
     )
   }
 
@@ -120,7 +121,7 @@ export default function HomeTransmisiones() {
                   year: 'numeric',
                 })}
               </p>
-              <h3 className="type-title-3 text-dark line-clamp-2">
+              <h3 className="type-title-3 text-ink line-clamp-2">
                 {video.title}
               </h3>
             </div>
@@ -128,27 +129,13 @@ export default function HomeTransmisiones() {
         ))}
       </div>
 
-      {/* Posición dentro de la tira, solo donde el carrusel existe */}
-      {videos.length > 1 && (
-        <div className="mt-4 flex justify-center gap-2 md:hidden">
-          {videos.map((video, i) => (
-            <button
-              key={video.videoId}
-              type="button"
-              aria-label={`Ver transmisión ${i + 1}`}
-              aria-current={i === indice}
-              onPointerDown={() => irA(i)}
-              className="flex h-6 w-6 items-center justify-center"
-            >
-              <span
-                className={`block h-1.5 rounded-full transition-all duration-300 ease-spring ${
-                  i === indice ? 'w-5 bg-primary' : 'w-1.5 bg-ink-quaternary'
-                }`}
-              />
-            </button>
-          ))}
-        </div>
-      )}
+      <PuntosCarrusel
+        total={videos.length}
+        indice={indice}
+        irA={irA}
+        etiqueta="transmisión"
+        className="mt-4"
+      />
 
       <div className="mt-8 text-center">
         <Link href="/en-vivo" className="btn-ghost">

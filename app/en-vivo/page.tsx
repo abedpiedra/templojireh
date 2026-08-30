@@ -6,6 +6,8 @@ import Footer from "@/components/Footer";
 import PageHeader from "@/components/PageHeader";
 import VideoModal, { type VideoEnReproduccion } from "@/components/VideoModal";
 import { etiquetaProximoServicio } from "@/lib/horarios";
+import EstadoVacio from "@/components/EstadoVacio";
+import BandaCta from "@/components/BandaCta";
 
 interface LiveData {
   isLive: boolean;
@@ -171,9 +173,9 @@ export default function EnVivoPage() {
           {loading ? (
             // Esqueleto con la forma del contenido que viene, no un spinner suelto
             <div className="mx-auto max-w-4xl">
-              <div className="aspect-video animate-pulse rounded-card bg-ink-quaternary/30" />
-              <div className="mt-4 h-6 w-2/3 animate-pulse rounded-full bg-ink-quaternary/30" />
-              <div className="mt-2 h-4 w-1/3 animate-pulse rounded-full bg-ink-quaternary/20" />
+              <div className="aspect-video animate-pulse rounded-card bg-fill/30" />
+              <div className="mt-4 h-6 w-2/3 animate-pulse rounded-full bg-fill/30" />
+              <div className="mt-2 h-4 w-1/3 animate-pulse rounded-full bg-fill/20" />
             </div>
           ) : liveData.isLive ? (
             <div className="mx-auto max-w-4xl">
@@ -198,7 +200,7 @@ export default function EnVivoPage() {
                 </div>
               </div>
               <div className="card mt-4 p-6">
-                <h2 className="type-title-2 text-dark">{liveData.title}</h2>
+                <h2 className="type-title-2 text-ink">{liveData.title}</h2>
                 {liveData.description && (
                   <p className="type-footnote text-ink-secondary mt-2 whitespace-pre-line">
                     {liveData.description}
@@ -211,7 +213,7 @@ export default function EnVivoPage() {
               <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-full bg-canvas-sunken">
                 <i className="fas fa-video-slash text-xl text-ink-tertiary"></i>
               </div>
-              <h2 className="type-title-2 text-dark">
+              <h2 className="type-title-2 text-ink">
                 No hay transmisión en este momento
               </h2>
               {proximo ? (
@@ -334,13 +336,11 @@ export default function EnVivoPage() {
           )}
 
           {filteredVideos.length === 0 ? (
-            <div className="card flex flex-wrap items-center justify-between gap-4 p-6">
-              <div className="flex items-center gap-3">
-                <i className="fab fa-youtube text-xl text-ink-quaternary"></i>
-                <p className="type-footnote text-ink-secondary">
-                  No hay transmisiones en este período.
-                </p>
-              </div>
+            <EstadoVacio
+              icono="fab fa-youtube"
+              texto="No hay transmisiones en este período."
+              compacto
+            >
               {activeFilter !== "todos" && (
                 <button
                   type="button"
@@ -351,7 +351,7 @@ export default function EnVivoPage() {
                   Ver todas
                 </button>
               )}
-            </div>
+            </EstadoVacio>
           ) : (
             <div className="relative">
               {filteredVideos.length > 3 && (
@@ -408,7 +408,7 @@ export default function EnVivoPage() {
                       <p className="type-caption text-primary mb-1">
                         {formatDate(video.publishedAt)}
                       </p>
-                      <h3 className="type-footnote font-semibold text-dark line-clamp-2">
+                      <h3 className="type-footnote font-semibold text-ink line-clamp-2">
                         {video.title}
                       </h3>
                     </div>

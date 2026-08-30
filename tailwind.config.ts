@@ -1,6 +1,9 @@
 import type { Config } from 'tailwindcss'
 
 const config: Config = {
+  // El tema se conmuta con una clase en <html>, no por preferencia del
+  // sistema: así el botón puede imponer la elección de la persona.
+  darkMode: 'class',
   content: [
     './pages/**/*.{js,ts,jsx,tsx,mdx}',
     './components/**/*.{js,ts,jsx,tsx,mdx}',
@@ -33,17 +36,20 @@ const config: Config = {
           DEFAULT: '#248a3d',
           tint: 'rgba(36, 138, 61, 0.10)',
         },
+        // Semánticos: su valor vive en globals.css y cambia con el tema
         ink: {
-          DEFAULT: '#1c1c22',
-          secondary: 'rgba(28, 28, 34, 0.62)',
-          tertiary: 'rgba(28, 28, 34, 0.42)',
-          quaternary: 'rgba(28, 28, 34, 0.20)',
+          DEFAULT: 'var(--ink)',
+          secondary: 'var(--ink-secondary)',
+          tertiary: 'var(--ink-tertiary)',
+          quaternary: 'var(--ink-quaternary)',
         },
-        separator: 'rgba(28, 28, 34, 0.10)',
+        // Relleno neutro derivado del texto; admite opacidad: bg-fill/20
+        fill: 'rgb(var(--ink-rgb) / <alpha-value>)',
+        separator: 'var(--separator)',
         canvas: {
-          DEFAULT: '#ffffff',
-          sunken: '#f4f4f6', // humo
-          raised: '#ffffff',
+          DEFAULT: 'var(--canvas)',
+          sunken: 'var(--canvas-sunken)',
+          raised: 'var(--canvas-raised)',
         },
       },
       fontFamily: {
@@ -70,10 +76,10 @@ const config: Config = {
       },
       boxShadow: {
         // Sombras conscientes del contexto: superficie mas grande = sombra mas profunda
-        chip: '0 1px 2px rgba(28, 28, 34, 0.06), 0 1px 1px rgba(28, 28, 34, 0.04)',
-        raised: '0 2px 8px rgba(28, 28, 34, 0.06), 0 1px 2px rgba(28, 28, 34, 0.04)',
-        floating: '0 12px 32px rgba(28, 28, 34, 0.10), 0 2px 8px rgba(28, 28, 34, 0.06)',
-        sheet: '0 24px 64px rgba(28, 28, 34, 0.20), 0 4px 12px rgba(28, 28, 34, 0.08)',
+        chip: 'var(--sombra-chip)',
+        raised: 'var(--sombra-raised)',
+        floating: 'var(--sombra-floating)',
+        sheet: 'var(--sombra-sheet)',
       },
       transitionTimingFunction: {
         // Aproximaciones CSS a resortes criticamente amortiguados (sin overshoot)

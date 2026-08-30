@@ -3,6 +3,9 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProximoServicioChip from "@/components/ProximoServicioChip";
+import SeccionEncabezado from "@/components/SeccionEncabezado";
+import TarjetaIcono from "@/components/TarjetaIcono";
+import BandaCta from "@/components/BandaCta";
 import HorariosCarrusel from "@/components/HorariosCarrusel";
 import HomeTransmisiones from "./HomeTransmisiones";
 
@@ -137,18 +140,18 @@ export default function HomePage() {
           hace volver. Va arriba y se reproduce dentro del sitio. */}
       <section id="transmisiones" className="seccion scroll-mt-24">
         <div className="container mx-auto px-4">
-          <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <p className="section-subtitle">Palabra de Dios</p>
-              <h2 className="section-title mb-0">Últimas transmisiones</h2>
-            </div>
-            <Link
-              href="/en-vivo"
-              className="pressable tactil type-footnote font-semibold text-primary"
-            >
-              Ver todas <i className="fas fa-arrow-right ml-1 text-[11px]"></i>
-            </Link>
-          </div>
+          <SeccionEncabezado
+            etiqueta="Palabra de Dios"
+            titulo="Últimas transmisiones"
+            accion={
+              <Link
+                href="/en-vivo"
+                className="pressable tactil type-footnote font-semibold text-primary"
+              >
+                Ver todas <i className="fas fa-arrow-right ml-1 text-[11px]"></i>
+              </Link>
+            }
+          />
 
           <HomeTransmisiones />
         </div>
@@ -233,26 +236,15 @@ export default function HomePage() {
       {/* Areas */}
       <section className="bg-canvas-sunken seccion">
         <div className="container mx-auto px-4">
-          <div className="mb-12 max-w-xl">
-            <p className="section-subtitle">Lo que hacemos</p>
-            <h2 className="section-title">Nuestras áreas</h2>
-          </div>
+          <SeccionEncabezado etiqueta="Lo que hacemos" titulo="Nuestras áreas" />
           <div className="grid gap-4 md:grid-cols-3 md:gap-6">
             {areas.map((item) => (
-              <article
+              <TarjetaIcono
                 key={item.title}
-                className="card flex gap-4 p-5 md:block md:p-7"
-              >
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary-tint md:mb-5 md:h-14 md:w-14">
-                  <i className={`fas ${item.icon} text-primary md:text-xl`}></i>
-                </div>
-                <div>
-                  <h3 className="type-title-3 text-dark mb-1 md:mb-2">
-                    {item.title}
-                  </h3>
-                  <p className="type-footnote text-ink-secondary">{item.desc}</p>
-                </div>
-              </article>
+                icono={item.icon}
+                titulo={item.title}
+                texto={item.desc}
+              />
             ))}
           </div>
         </div>
@@ -261,25 +253,19 @@ export default function HomePage() {
       {/* Primera visita: quita las dudas que frenan a quien nunca ha venido */}
       <section className="seccion">
         <div className="container mx-auto px-4">
-          <div className="mb-12 max-w-xl">
-            <p className="section-subtitle">¿Es tu primera vez?</p>
-            <h2 className="section-title">Lo que necesitas saber</h2>
-            <p className="type-body text-ink-secondary">
-              No hace falta que avises ni que traigas nada. Ven como estás.
-            </p>
-          </div>
+          <SeccionEncabezado
+            etiqueta="¿Es tu primera vez?"
+            titulo="Lo que necesitas saber"
+            descripcion="No hace falta que avises ni que traigas nada. Ven como estás."
+          />
           <div className="grid gap-4 md:grid-cols-3 md:gap-6">
             {primeraVisita.map((item) => (
-              <article
+              <TarjetaIcono
                 key={item.title}
-                className="card flex gap-4 p-5 md:block md:p-7"
+                icono={item.icon}
+                titulo={item.title}
+                texto={item.desc}
               >
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary-tint md:mb-5 md:h-12 md:w-12">
-                  <i className={`fas ${item.icon} text-primary`}></i>
-                </div>
-                <div>
-                <h3 className="type-title-3 text-dark mb-1 md:mb-2">{item.title}</h3>
-                <p className="type-footnote text-ink-secondary">{item.desc}</p>
                 {item.href && (
                   <a
                     href={item.href}
@@ -291,40 +277,31 @@ export default function HomePage() {
                     <i className="fas fa-arrow-right text-[11px]"></i>
                   </a>
                 )}
-                </div>
-              </article>
+              </TarjetaIcono>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Invitacion final */}
-      <section className="relative overflow-hidden bg-dark seccion text-center text-white">
-        <div className="brand-wash absolute inset-0" aria-hidden="true" />
-        <div className="container relative mx-auto px-4">
-          <h2 className="type-title-1">Te esperamos este domingo</h2>
-          <p className="type-body-lg mx-auto mt-4 max-w-lg text-white/70">
-            Escuela Dominical a las 10:00 y servicio de adoración a las 11:15,
-            en Presidente Alessandri #0498, La Granja.
-          </p>
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
-            <Link
-              href="/contacto"
-              className="btn-base w-full bg-white px-8 py-4 text-dark shadow-floating hover:bg-white/90 sm:w-auto"
-            >
-              Planifica tu visita
-            </Link>
-            <a
-              href="https://maps.google.com/?q=Presidente+Alessandri+0498,+La+Granja"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-outline w-full px-8 py-4 sm:w-auto"
-            >
-              <i className="fas fa-location-dot"></i> Cómo llegar
-            </a>
-          </div>
-        </div>
-      </section>
+      <BandaCta
+        titulo="Te esperamos este domingo"
+        texto="Escuela Dominical a las 10:00 y servicio de adoración a las 11:15, en Presidente Alessandri #0498, La Granja."
+      >
+        <Link
+          href="/contacto"
+          className="btn-base w-full bg-white px-8 py-4 text-dark shadow-floating hover:bg-white/90 sm:w-auto"
+        >
+          Planifica tu visita
+        </Link>
+        <a
+          href="https://maps.google.com/?q=Presidente+Alessandri+0498,+La+Granja"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="btn-outline w-full px-8 py-4 sm:w-auto"
+        >
+          <i className="fas fa-location-dot"></i> Cómo llegar
+        </a>
+      </BandaCta>
 
       <Footer />
     </>

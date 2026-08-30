@@ -1,6 +1,7 @@
 'use client'
 
 import { useAutoCarrusel } from '@/lib/useAutoCarrusel'
+import PuntosCarrusel from '@/components/PuntosCarrusel'
 
 interface Horario {
   icon: string
@@ -40,26 +41,13 @@ export default function HorariosCarrusel({ horarios }: { horarios: Horario[] }) 
         ))}
       </div>
 
-      {/* Posición dentro de la tira, y atajo para saltar a cualquiera.
-          Solo en pantallas donde el carrusel existe. */}
-      <div className="flex justify-center gap-2 pb-3 md:hidden">
-        {horarios.map((item, i) => (
-          <button
-            key={item.title}
-            type="button"
-            aria-label={`Ver ${item.title}`}
-            aria-current={i === indice}
-            onPointerDown={() => irA(i)}
-            className="flex h-6 w-6 items-center justify-center"
-          >
-            <span
-              className={`block h-1.5 rounded-full transition-all duration-300 ease-spring ${
-                i === indice ? 'w-5 bg-primary' : 'w-1.5 bg-ink-quaternary'
-              }`}
-            />
-          </button>
-        ))}
-      </div>
+      <PuntosCarrusel
+        total={horarios.length}
+        indice={indice}
+        irA={irA}
+        etiqueta="horario"
+        className="pb-3"
+      />
     </div>
   )
 }
