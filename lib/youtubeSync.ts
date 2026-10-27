@@ -58,3 +58,36 @@ export async function syncFromRSS(
   // un video ausente del feed no significa que se haya eliminado de YouTube.
   return { synced, videos }
 }
+
+// Quita de MongoDB los videos que ya no existen en YouTube (borrados o
+// pasados a privados), que de otro modo quedarían con la miniatura rota.
+// Se pregunta por los ids guardados con videos.list: 50 ids por llamada,
+// 1 unidad de cuota cada una. Ante cualquier error no se borra nada.
+export async function eliminarVideosInexistentes(
+  init: RequestInit = { cache: 'no-store' }
+): Promise<{ deleted: number }> {
+  const apiKey = process.env.YOUTUBE_API_KEY
+  if (!apiKey) return { deleted: 0 }
+
+  const guardados = await YouTubeVideo.find({}, { videoId: 1 }).lean()
+  const ids: string[] = guardados.map((video: any) => video.videoId)
+
+  const existentes = new Set<string>()
+  for (let i = 0; i < ids.length; i += 50) {
+    const lote = ids.slice(i, i + 50)
+    const url = `https://www.googleapis.com/youtube/v3/videos?part=id&id=${lote.join(',')}&key=${apiKey}`
+    const response = await fetch(url, init)
+    const data = await response.json()
+
+    if (!response.ok || data.error || !Array.isArray(data.items)) {
+      throw new Error(data.error?.message || 'Respuesta inválida de YouTube')
+    }
+    for (const item of data.items) existentes.add(item.id)
+  }
+
+  const inexistentes = ids.filter((id) => !existentes.has(id))
+  if (inexistentes.length === 0) return { deleted: 0 }
+
+  const result = await YouTubeVideo.deleteMany({ videoId: { $in: inexistentes } })
+  return { deleted: result.deletedCount || 0 }
+}
