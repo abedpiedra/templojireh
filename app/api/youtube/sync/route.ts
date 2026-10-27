@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import connectDB from '@/lib/mongodb'
 import YouTubeVideo from '@/lib/models/YouTubeVideo'
-import { syncFromRSS } from '@/lib/youtubeSync'
+import { eliminarVideosInexistentes, syncFromRSS } from '@/lib/youtubeSync'
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY
 const CHANNEL_ID = 'UC9-tHryaBdWIBE3o_cM1AsQ' // @TemploJirehTV
@@ -77,10 +77,12 @@ export async function POST(request: Request) {
     // Usar RSS por defecto (no usa cuota)
     if (source === 'rss') {
       const result = await syncFromRSS()
+      const { deleted } = await eliminarVideosInexistentes()
       return NextResponse.json({
         success: true,
-        message: `Synced ${result.synced} videos`,
+        message: `Synced ${result.synced} videos, removed ${deleted} deleted from YouTube`,
         synced: result.synced,
+        deleted,
         source: 'rss'
       })
     }

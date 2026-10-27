@@ -60,7 +60,8 @@ ADMIN_PASSWORD=           # Contraseña del administrador
 - **Videos del canal:** `/api/youtube/videos` se cachea 15 minutos y al
   regenerarse sincroniza el RSS del canal hacia MongoDB (`lib/youtubeSync.ts`,
   sin cuota). No hay cron: el plan Hobby de Vercel solo permite crons diarios.
-  El sync nunca borra videos: el RSS solo trae los ~15 más recientes.
+  El RSS solo trae los ~15 más recientes, así que su ausencia no borra nada:
+  los videos eliminados de YouTube se quitan consultando `videos.list` por id.
 - **Facebook Graph API** (`FACEBOOK_PAGE_ID`, `FACEBOOK_PAGE_TOKEN`): publicaciones
   de la página en `/redes`. Es **opcional**: sin las variables, `FacebookFeed`
   cae automáticamente al plugin oficial de Facebook. El token se lee solo en
