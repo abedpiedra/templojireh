@@ -207,13 +207,13 @@ export default function NosotrosPage() {
       >
         <Link
           href="/contacto"
-          className="btn-base w-full bg-white px-8 py-4 text-dark shadow-floating hover:bg-white/90 sm:w-auto"
+          className="btn-primary w-full px-8 py-4 sm:w-auto dark:bg-white dark:text-dark dark:shadow-floating dark:hover:bg-white/90"
         >
           Planifica tu visita
         </Link>
       </BandaCta>
 
-      <Footer />
+      <Footer invitacion={false} />
     </>
   );
 }
