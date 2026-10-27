@@ -4,32 +4,52 @@ import YouTubeVideo from '@/lib/models/YouTubeVideo'
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY
 const CHANNEL_ID = 'UC9-tHryaBdWIBE3o_cM1AsQ' // @TemploJirehTV
+// La lista "uploads" del canal: mismo id con prefijo UU en lugar de UC
+const UPLOADS_PLAYLIST_ID = `UU${CHANNEL_ID.slice(2)}`
 
-export const dynamic = 'force-dynamic'
+// La respuesta se cachea en el servidor: todos los visitantes comparten una
+// sola consulta por minuto, sin importar cuántos estén sondeando.
+export const revalidate = 60
 
 export async function GET() {
   try {
     await connectDB()
 
-    // Intentar obtener estado en vivo desde YouTube API
+    // Intentar obtener estado en vivo desde YouTube API.
+    // playlistItems.list y videos.list cuestan 1 unidad cada uno
+    // (search.list costaba 100 y agotaba la cuota diaria en minutos).
     if (YOUTUBE_API_KEY) {
       try {
-        const searchUrl = `https://www.googleapis.com/youtube/v3/search?part=snippet&channelId=${CHANNEL_ID}&eventType=live&type=video&key=${YOUTUBE_API_KEY}`
+        const playlistUrl = `https://www.googleapis.com/youtube/v3/playlistItems?part=contentDetails&playlistId=${UPLOADS_PLAYLIST_ID}&maxResults=10&key=${YOUTUBE_API_KEY}`
+        const playlistResponse = await fetch(playlistUrl, { next: { revalidate: 60 } })
+        const playlistData = await playlistResponse.json()
 
-        const response = await fetch(searchUrl, { cache: 'no-store' })
-        const data = await response.json()
+        if (playlistData.error) throw new Error(playlistData.error.message)
+
+        const videoIds: string[] = (playlistData.items || []).map(
+          (item: any) => item.contentDetails.videoId
+        )
+
+        let data: any = { items: [] }
+        if (videoIds.length > 0) {
+          const videosUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet&id=${videoIds.join(',')}&key=${YOUTUBE_API_KEY}`
+          const videosResponse = await fetch(videosUrl, { next: { revalidate: 60 } })
+          data = await videosResponse.json()
+        }
 
         // Si no hay error de cuota, actualizar caché
         if (!data.error) {
           // Primero, marcar todos los videos como no en vivo
           await YouTubeVideo.updateMany({}, { isLive: false })
 
-          if (data.items && data.items.length > 0) {
-            const liveVideo = data.items[0]
+          const liveVideo = (data.items || []).find(
+            (item: any) => item.snippet.liveBroadcastContent === 'live'
+          )
 
+          if (liveVideo) {
             // Guardar/actualizar el video en vivo en MongoDB
             const videoData = {
-              videoId: liveVideo.id.videoId,
+              videoId: liveVideo.id,
               title: liveVideo.snippet.title,
               description: liveVideo.snippet.description,
               thumbnail: liveVideo.snippet.thumbnails.high?.url || liveVideo.snippet.thumbnails.default?.url,
@@ -45,10 +65,10 @@ export async function GET() {
 
             return NextResponse.json({
               isLive: true,
-              videoId: liveVideo.id.videoId,
-              title: liveVideo.snippet.title,
+              videoId: videoData.videoId,
+              title: videoData.title,
               thumbnail: videoData.thumbnail,
-              description: liveVideo.snippet.description,
+              description: videoData.description,
             })
           }
 

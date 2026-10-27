@@ -2,68 +2,12 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import connectDB from '@/lib/mongodb'
 import YouTubeVideo from '@/lib/models/YouTubeVideo'
+import { syncFromRSS } from '@/lib/youtubeSync'
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY
 const CHANNEL_ID = 'UC9-tHryaBdWIBE3o_cM1AsQ' // @TemploJirehTV
 
 export const dynamic = 'force-dynamic'
-
-// Función para parsear el feed RSS de YouTube (no usa cuota de API)
-async function syncFromRSS(): Promise<{ synced: number; deleted: number; videos: string[] }> {
-  const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`
-  const response = await fetch(rssUrl, { cache: 'no-store' })
-  const xml = await response.text()
-
-  const videos: string[] = []
-  const videoIds: string[] = []
-  let synced = 0
-
-  // Extraer videos del XML usando regex
-  const entryRegex = /<entry>([\s\S]*?)<\/entry>/g
-  const videoIdRegex = /<yt:videoId>([^<]+)<\/yt:videoId>/
-  const titleRegex = /<title>([^<]+)<\/title>/
-  const publishedRegex = /<published>([^<]+)<\/published>/
-  const thumbnailRegex = /<media:thumbnail url="([^"]+)"/
-  const descriptionRegex = /<media:description>([^<]*)<\/media:description>/
-
-  let match
-  while ((match = entryRegex.exec(xml)) !== null) {
-    const entry = match[1]
-
-    const videoIdMatch = entry.match(videoIdRegex)
-    const titleMatch = entry.match(titleRegex)
-    const publishedMatch = entry.match(publishedRegex)
-    const thumbnailMatch = entry.match(thumbnailRegex)
-    const descriptionMatch = entry.match(descriptionRegex)
-
-    if (videoIdMatch && titleMatch && publishedMatch) {
-      const videoData = {
-        videoId: videoIdMatch[1],
-        title: titleMatch[1],
-        description: descriptionMatch ? descriptionMatch[1] : '',
-        thumbnail: thumbnailMatch ? thumbnailMatch[1] : `https://i.ytimg.com/vi/${videoIdMatch[1]}/hqdefault.jpg`,
-        publishedAt: new Date(publishedMatch[1]),
-        isLive: false,
-      }
-
-      await YouTubeVideo.findOneAndUpdate(
-        { videoId: videoData.videoId },
-        videoData,
-        { upsert: true, new: true }
-      )
-      videoIds.push(videoData.videoId)
-      videos.push(videoData.title)
-      synced++
-    }
-  }
-
-  // Eliminar videos que ya no están en el RSS (fueron eliminados de YouTube)
-  const deleteResult = await YouTubeVideo.deleteMany({
-    videoId: { $nin: videoIds }
-  })
-
-  return { synced, deleted: deleteResult.deletedCount || 0, videos }
-}
 
 // Función para sincronizar usando la API de YouTube (usa cuota)
 async function syncFromAPI(): Promise<{ synced: number; quotaError?: boolean }> {
@@ -135,9 +79,8 @@ export async function POST(request: Request) {
       const result = await syncFromRSS()
       return NextResponse.json({
         success: true,
-        message: `Synced ${result.synced} videos, deleted ${result.deleted} old videos`,
+        message: `Synced ${result.synced} videos`,
         synced: result.synced,
-        deleted: result.deleted,
         source: 'rss'
       })
     }

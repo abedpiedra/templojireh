@@ -35,6 +35,7 @@ lib/
 ├── useSheet.ts               # Hojas y cajones arrastrables
 ├── horarios.ts               # Horarios y cálculo de próxima reunión
 ├── youtube.ts                # Utilidades de enlaces de YouTube
+├── youtubeSync.ts            # Sincronización del RSS del canal hacia MongoDB
 └── models/
     ├── User.ts               # Modelo usuarios
     └── YouTubeVideo.ts       # Modelo videos sincronizados
@@ -53,8 +54,13 @@ ADMIN_PASSWORD=           # Contraseña del administrador
 
 ## Integraciones externas
 
-- **YouTube Data API** (`YOUTUBE_API_KEY`): estado en vivo y sincronización de
-  videos hacia MongoDB.
+- **YouTube Data API** (`YOUTUBE_API_KEY`): estado en vivo en
+  `/api/youtube/live` con `playlistItems` + `videos` (1 unidad cada uno, nunca
+  `search.list`, que cuesta 100) y respuesta cacheada 60 s en el servidor.
+- **Videos del canal:** `/api/youtube/videos` se cachea 15 minutos y al
+  regenerarse sincroniza el RSS del canal hacia MongoDB (`lib/youtubeSync.ts`,
+  sin cuota). No hay cron: el plan Hobby de Vercel solo permite crons diarios.
+  El sync nunca borra videos: el RSS solo trae los ~15 más recientes.
 - **Facebook Graph API** (`FACEBOOK_PAGE_ID`, `FACEBOOK_PAGE_TOKEN`): publicaciones
   de la página en `/redes`. Es **opcional**: sin las variables, `FacebookFeed`
   cae automáticamente al plugin oficial de Facebook. El token se lee solo en
