@@ -405,6 +405,48 @@
       linear-gradient(180deg, #1c1c22 0%, #3a3a44 100%);
   }
 
+  /* Superficies de marca que siguen al tema (encabezado de página y banda
+     de cierre). En claro son luz con un rubor de rojo; en oscuro, el mismo
+     grafito de siempre. El texto encima usa los tokens ink. */
+  .header-wash {
+    background:
+      radial-gradient(110% 100% at 12% 0%, rgba(255, 74, 95, 0.16) 0%, rgba(255, 255, 255, 0) 58%),
+      radial-gradient(80% 90% at 85% 10%, rgba(105, 13, 36, 0.08) 0%, rgba(255, 255, 255, 0) 62%),
+      linear-gradient(160deg, #ffffff 0%, #f4f4f6 100%);
+  }
+  .dark .header-wash {
+    background:
+      radial-gradient(110% 100% at 12% 0%, rgba(255, 74, 95, 0.34) 0%, rgba(28, 28, 34, 0) 58%),
+      radial-gradient(80% 90% at 85% 10%, rgba(105, 13, 36, 0.55) 0%, rgba(28, 28, 34, 0) 62%),
+      linear-gradient(160deg, #1c1c22 0%, #3a3a44 100%);
+  }
+  .brand-wash-tema {
+    background:
+      radial-gradient(90% 120% at 50% 0%, rgba(214, 18, 47, 0.12) 0%, rgba(253, 243, 244, 0) 62%),
+      linear-gradient(180deg, #fdf3f4 0%, #f9e9ec 100%);
+  }
+  .dark .brand-wash-tema {
+    background:
+      radial-gradient(90% 120% at 50% 0%, rgba(228, 19, 47, 0.30) 0%, rgba(28, 28, 34, 0) 62%),
+      linear-gradient(180deg, #1c1c22 0%, #3a3a44 100%);
+  }
+  /* Acción secundaria sobre esas superficies: tonal en claro, vidrio en oscuro */
+  .btn-tonal {
+    @apply btn-base text-ink;
+    background: rgb(var(--ink-rgb) / 0.06);
+    border: 1px solid rgb(var(--ink-rgb) / 0.16);
+  }
+  .btn-tonal:hover {
+    background: rgb(var(--ink-rgb) / 0.11);
+  }
+  .dark .btn-tonal {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.35);
+  }
+  .dark .btn-tonal:hover {
+    background: rgba(255, 255, 255, 0.24);
+  }
+
   /* Campos de formulario: validacion inline, no al enviar */
   .field {
     @apply w-full rounded-control border border-separator bg-canvas-raised px-4 py-3 text-ink;

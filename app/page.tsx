@@ -287,7 +287,7 @@ export default function HomePage() {
       <BandaCta encabezado={<InvitacionJornada />}>
         <Link
           href="/contacto"
-          className="btn-base w-full bg-white px-8 py-4 text-dark shadow-floating hover:bg-white/90 sm:w-auto"
+          className="btn-primary w-full px-8 py-4 sm:w-auto dark:bg-white dark:text-dark dark:shadow-floating dark:hover:bg-white/90"
         >
           Planifica tu visita
         </Link>
@@ -295,13 +295,13 @@ export default function HomePage() {
           href="https://maps.google.com/?q=Presidente+Alessandri+0498,+La+Granja"
           target="_blank"
           rel="noopener noreferrer"
-          className="btn-outline w-full px-8 py-4 sm:w-auto"
+          className="btn-tonal w-full px-8 py-4 sm:w-auto"
         >
           <i className="fas fa-location-dot"></i> Cómo llegar
         </a>
       </BandaCta>
 
-      <Footer />
+      <Footer invitacion={false} />
     </>
   );
 }

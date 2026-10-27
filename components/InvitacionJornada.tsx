@@ -43,7 +43,7 @@ export default function InvitacionJornada({
     return (
       <div>
         <p className="type-title-2">Te esperamos {jornada.cuando}</p>
-        <p className="type-footnote text-white/60 mt-1">{jornada.detalle}</p>
+        <p className="type-footnote text-ink-tertiary mt-1">{jornada.detalle}</p>
       </div>
     )
   }
@@ -51,7 +51,7 @@ export default function InvitacionJornada({
   return (
     <>
       <h2 className="type-title-1">Te esperamos {jornada.cuando}</h2>
-      <p className="type-body-lg mx-auto mt-4 max-w-lg text-white/70">
+      <p className="type-body-lg mx-auto mt-4 max-w-lg text-ink-secondary">
         {jornada.detalle}, en Presidente Alessandri #0498, La Granja.
       </p>
     </>
